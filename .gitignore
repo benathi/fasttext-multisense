@@ -2,3 +2,5 @@
 *.o
 ftmulti
 sftp-config.json
+data/
+*.pyc

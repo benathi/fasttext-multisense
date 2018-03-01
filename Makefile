@@ -46,7 +46,7 @@ fasttext.o: src/fasttext.cc src/*.h
 	$(CXX) $(CXXFLAGS) -c src/fasttext.cc
 
 fasttext: $(OBJS) src/fasttext.cc
-	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o ftmulti
+	$(CXX) $(CXXFLAGS) $(OBJS) src/main.cc -o multift
 
 clean:
-	rm -rf *.o ftmulti
+	rm -rf *.o multift
