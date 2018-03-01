@@ -261,7 +261,7 @@ def get_ws_loader(ds):
 
 # We change it to lower case by default
 def wordsim_eval(model_names,
-  wordsim_datasets=['WS', 'MEN', 'RW'],
+  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS'],
   lower=True,
   verbose=0):
   # model_names is a list of pairs (model_abbreviation, save_path)
@@ -483,15 +483,8 @@ def quantitative_eval(model_names, verbose=0):
   return df0
 
 def eval_ft(ft, name, verbose=0, which=['norm', 'wordsim'], wordrep=['sub', 'dout', 'din', 'combined'],
-  wordsim_datasets=['WS', 'MEN', 'RW', 'SCWS'],
-  lower=True
-  #wordsim_datasets=['WS', 'MEN', 'RW', 'RW-rare', 'RW-mod', 'RW-common']
-  ):
-  # add option to evaluate what part of embeddings too (sub, dout, din)
-
-  #model_names = [(name + '-sub', ft.subword_rep, ft, ft.subword_emb),
-  #        (name + '-dout', ft.dict_rep_out, ft, ft.emb_out),
-  #        (name + '-din', ft.dict_rep, ft, ft.emb)]
+  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS'],
+  lower=True):
   print 'wordrep =', wordrep
   model_names = []
   for rep in wordrep:
@@ -605,7 +598,7 @@ def emb_norm_plots(ft, name=None):
 
 
 #### Adding more tests for multi-rep
-def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['WS', 'MEN', 'RW', 'SCWS']):
+def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS']):
   return wordsim_eval([('sub', _ft.subword_rep),
                       ('sub2', lambda word: _ft.subword_rep(word, emb=_ft.emb2, subword_emb=_ft.subword_emb2)),
                       ('sub-maxsim', _ft.subword_rep_multi),
@@ -615,14 +608,10 @@ def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['WS', 'MEN', 'R
                      ], verbose=verbose,
                     wordsim_datasets=wordsim_datasets, lower=lower)
 
-# Ben: TODO
-def eval_multi_word(_ft, verbose=False, lower=True, wordsim_datasets=['WS', 'MEN', 'RW', 'SCWS']):
+def eval_multi_word(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS']):
   return wordsim_eval([ ('in', _ft.dict_rep),
                         ('in2', _ft.dict_rep2),
                         ('in-maxsim', _ft.dict_rep_multi),
-                      #('sub', _ft.subword_rep),
-                      #('sub2', lambda word: _ft.subword_rep(word, emb=_ft.emb2, subword_emb=_ft.subword_emb2)),
-                      #('sub-maxsim', _ft.subword_rep_multi),
                       ('out', _ft.dict_rep_out),
                       ('out2', _ft.dict_rep_out2),
                       ('out-maxsim', _ft.dict_rep_out_multi)
