@@ -19,16 +19,20 @@ We provide
 make
 ```
 
-2. Obtain text data. We included scripts to download text8 and text9. 
+2. Obtain text data. We included scripts to download **text8** and **text9**. 
 ```
+bash get_text8.sh
 bash get_text9.sh
 ```
 In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our English text corpus. Both datasets can be requested [here](http://wacky.sslmit.unibo.it/doku.php?id=download).
 
 The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (French) can be requested using the above link as well. 
 
+**Note: add script to prepare ukWac + Wackypedia?**
+
 3. Run a sample script for *text8* or *text9*.
 ```
+bash exps/train_text8_multi.sh
 bash exps/train_text9_multi.sh
 ```
 After the training is complete, the following model files will be saved:
