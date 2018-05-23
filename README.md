@@ -69,6 +69,8 @@ modelname.subword   The final representation of words in the dictionary. Note th
 ft = multift.MultiFastText(basename="", multi=True)
 ```
 
+**BenA : add instruction to evaluate single-sense models**
+
 We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. 
 
 2. The script **eval/eval_model_wordsim.py** calculates the Spearman's correlation for multiple word similarity datasets given a model. We provide examples below.
