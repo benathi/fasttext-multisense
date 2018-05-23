@@ -1,4 +1,18 @@
-# Probabilistic FastText for Multi-Sense Embeddings
+# Probabilistic FastText for Multi-Sense Word Embeddings
+This repository contains the implementation of the models in *[Athiwaratkun et al.](https://arxiv.org/abs/1704.08424), Probabilistic FastText for Multi-Sense Word Embeddings, ACL 2018*.
+
+We represent each word in the dictionary as a Gaussian Mixture distribution and train it using a max-margin objective based on expected likelihood kernel energy function.
+
+The BibTeX entry for the paper is:
+
+```bibtex
+@InProceedings{athi_multift_2018,
+    author = {Ben Athiwaratkun, Andrew Gordon Wilson, and Anima Anandkumar},
+    title = {Probabilistic FastText for Multi-Sense Word Embeddings},
+    booktitle = {Conference of the Association for Computational Linguistics (ACL)},
+    year = {2018}
+}
+```
 
 ## What's in this Library?
 
