@@ -14,7 +14,7 @@ import multift
 
 ## 1. Evaluation Data Loading
 def load_SimLex999():
-    _fpath = os.path.join('/efs/users/benathi/research/fastText/data/word_similarity_datasets/', 'SimLex-999.txt')
+    _fpath = os.path.join('data/word_similarity_datasets/', 'SimLex-999.txt')
     #_fpath = filepath if filepath is not None else os.environ['SIMLEX999_FILE']
     df = pd.read_csv(_fpath, delimiter='\t')
     word1 = df['word1'].tolist()
@@ -25,7 +25,7 @@ def load_SimLex999():
 
 def load_data_format1(filename='EN-MC-30.txt', delim='\t', verbose=False):
     if verbose: print 'Loading file', filename
-    fpath = os.path.join('/efs/users/benathi/research/fastText/data/word_similarity_datasets/', filename)
+    fpath = os.path.join('data/word_similarity_datasets/', filename)
     df = pd.read_csv(fpath, delimiter=delim, header=None)
     word1 = df[0].tolist()
     word2 = df[1].tolist()
@@ -35,7 +35,7 @@ def load_data_format1(filename='EN-MC-30.txt', delim='\t', verbose=False):
 
 def load_data_format3(filename='EN-MC-30.txt', delim='\t', verbose=False, remove_accent=True):
     if verbose: print 'Loading file', filename
-    fpath = os.path.join('/efs/users/benathi/research/fastText/data/word_similarity_datasets/', filename)
+    fpath = os.path.join('data/word_similarity_datasets/', filename)
     df = pd.read_csv(fpath, delimiter=delim, header=None)
     word1 = df[0].tolist()
     word2 = df[1].tolist()
@@ -78,14 +78,6 @@ def load_WS_sim():
 def load_YP():
     return load_data_format1(filename='EN-YP-130.txt', delim=' ')
 
-def load_RW_rare():
-  return load_data_format1(filename='EN-RW-STANFORD-vrare.txt')
-
-def load_RW_moderate():
-  return load_data_format1(filename='EN-RW-STANFORD-moderate.txt')
-
-def load_RW_common():
-  return load_data_format1(filename='EN-RW-STANFORD-common.txt')
 
 def load_SCWS():
   ll = process_huang()
@@ -98,7 +90,7 @@ def filter_accent(word):
 def load_data_format2(filename='foreign/de/gur350.txt', delim=':', verbose=False, header_idx=0,
   remove_accent=True):
   if verbose: print 'Loading file', filename
-  fpath = os.path.join('/efs/users/benathi/research/fastText/data/word_similarity_datasets/', filename)
+  fpath = os.path.join('data/word_similarity_datasets/', filename)
   df = pd.read_csv(fpath, delimiter=delim, header=header_idx)
   word1 = df['#WORD1'].tolist()
   word2 = df['WORD2'].tolist()
@@ -107,10 +99,6 @@ def load_data_format2(filename='foreign/de/gur350.txt', delim=':', verbose=False
   if remove_accent:
     word1_ = [filter_accent(_w) for _w in word1]
     word2_ = [filter_accent(_w) for _w in word2]
-    #the dataframe displays the accents correctly but sems like 
-    # the python list does not
-    #print df
-    #print word1_, word2_, score
     return word1_, word2_, score
   else:
     return word1, word2, score
@@ -130,7 +118,7 @@ def load_fr_ws353():
 
 def load_data_format4(filename='wordsim_foreign_clean/monolingual_lang/it', delim='\t', verbose=False, remove_accent=True):
     if verbose: print 'Loading file', filename
-    fpath = os.path.join('/efs/users/benathi/research/fastText/data/word_similarity_datasets/', filename)
+    fpath = os.path.join('data/word_similarity_datasets/', filename)
     df = pd.read_csv(fpath, delimiter=delim, header=0)
     word1 = df["Word1"].tolist()
     word2 = df["Word2"].tolist()
@@ -154,8 +142,6 @@ def load_it_sl999():
 def process_huang(filename='data/word_similarity_datasets/scws.txt',
                 context_window=5,
                 verbose=False):
-  #dirname = 'evaluation_data'
-  #filepath = os.path.join(dirname, filename)
   dirname = "/efs/users/benathi/research/fastText"
   filepath = os.path.join(dirname, filename)
   f = open(filepath, 'r')
@@ -207,12 +193,10 @@ def calculate_correlation(data_loader, vec_gen, verbose=True, lower=False):
       word2 = [word.lower() for word in word2]
 
     if verbose:
-      #print word1
       print "*************************************"
       print type(word1)
       print len(word1)
       print word1[0]
-      #print vec_gen(word1)
     word1_idxs, indic1 = vec_gen(word1)
     word2_idxs, indic2 = vec_gen(word2)
     num_oov = sum(indic1) + sum(indic2)
@@ -221,8 +205,6 @@ def calculate_correlation(data_loader, vec_gen, verbose=True, lower=False):
 
     scores = np.zeros((len(word1_idxs)))
     for _i, [w1, w2] in enumerate(zip(word1_idxs, word2_idxs)):
-      #if type(w1) == np.ndarray:
-      #if verbose: print "w1.shape", w1.shape
       if len(w1.shape) == 1:
         scores[_i] = cosine_sim(w1, w2)
       elif len(w1.shape) == 2:
@@ -245,11 +227,11 @@ def calculate_correlation(data_loader, vec_gen, verbose=True, lower=False):
 wordsim_dataset_funcs = [load_SimLex999, load_WS_all, load_WS_sim, load_WS_rel, 
                 load_MEN, load_MC, load_RG, load_YP,
                 load_Mturk287, load_Mturk771,
-                load_RW_Stanford, load_RW_rare, load_RW_moderate, load_RW_common, load_SCWS,
+                load_RW_Stanford, load_SCWS,
                 load_de_gur350, load_de_gur65, load_de_zg222, load_fr_ws353, load_it_ws353, load_it_sl999]
 
 wordsim_dataset_names = ['SL', 'WS', 'WS-S', 'WS-R', 'MEN',
-                             'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'RW-rare', 'RW-mod', 'RW-common', 'SCWS',
+                             'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS',
                              'DE-GUR350', 'DE-GUR65', 'DE-ZG222', 'FR-WS-353', 'IT-WS-353', 'IT-SL-999']
 wordsim_dict = {}
 for name, func in zip(wordsim_dataset_names, wordsim_dataset_funcs):
@@ -261,16 +243,14 @@ def get_ws_loader(ds):
 
 # We change it to lower case by default
 def wordsim_eval(model_names,
-  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS'],
+  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW'],
   lower=True,
   verbose=0):
-  # model_names is a list of pairs (model_abbreviation, save_path)
   spearman_corrs = pd.DataFrame()
   assert set(wordsim_datasets) < set(wordsim_dataset_names) # test that it's a subset
   spearman_corrs['Dataset'] = wordsim_datasets
   dir_path = os.path.dirname(os.path.realpath(__file__))
   for i, model in enumerate(model_names):
-    # expect (name, rep, ...)
     model_abbrev, vector_gen = model[:2]
     results = []
     for wordsim_ds in wordsim_datasets:
@@ -283,76 +263,6 @@ def wordsim_eval(model_names,
 
 def flatten_list(ll):
     return  [item for sublist in ll for item in sublist]
-
-# BenA: the following methods are very slow - deprecated
-"""
-def analogy_loader(fname='data/questions-words.txt'):
-  sem_ds = []
-  syn_ds = []
-  f = open(fname, 'r')
-  master_list = []
-  block_list = []
-  for line in f:
-    if line.startswith(':'):
-        if block_list is not []:
-            master_list.append(block_list)
-        block_list = []
-    else:
-        word_list = line.strip().split(" ")
-        block_list.append(word_list)
-  return flatten_list(master_list[:6]), flatten_list(master_list[6:]) # 6 because the first one is an empty list
-
-def analogy_accuracy(analogy_ds, emb_func, nn_func, verbose=0):
-    match = []
-    for sample in analogy_ds:
-        sample = [item.lower() for item in sample]
-        (v1, v2, v3), _ = emb_func(sample[:3])
-        v4 = v2 - v1 + v3
-        nn_words = nn_func(v4, emb_func, num_neighbors=1)
-        nn_word = nn_words[0]
-        if verbose:
-            print "{} : {} = {} : ?({})".format(sample[0], sample[1], sample[2], sample[3])
-            print("predicted: {} vs correct: {}".format(nn_word, sample[3]))
-            print("Top words:", nn_words)
-        match.append(nn_word == sample[3])
-    return sum(match)/(1.*len(match))
-
-def analogy_eval(model_names, fname='data/questions-words.txt', debug=False, verbose=0):
-  # model_names is list of (name, emb_func, nn_func)
-  sem, syn = analogy_loader(fname)
-  if debug:
-    sem = sem[:3]
-    syn = syn[:3]
-  df = pd.DataFrame()
-  df['Dataset'] = ['SemAma', 'SynAna']
-  for i, (name, emb_func, nn_func) in enumerate(model_names):
-    sem_acc = analogy_accuracy(sem, emb_func, nn_func, verbose)
-    syn_acc = analogy_accuracy(syn, emb_func, nn_func, verbose)
-    df['name'] = [sem_acc, syn_acc]
-  return df
-"""
-"""
-def prep_embeddings(words, emb_func, limit_vocab_size=30000, D=100, verbose=False):
-  emb = None
-  if type(emb_func) is np.ndarray:
-    size = min(limit_vocab_size, emb_func.shape[0])
-    emb =  emb_func[:size]
-  else:
-    emb = np.zeros((limit_vocab_size, D))
-    for i in range(limit_vocab_size):
-      emb[i], _ = emb_func(words[i])
-  # else, expect it to be a function
-  f = NamedTemporaryFile(delete=False)
-  f.write("{} {}\n".format(limit_vocab_size, D))
-  for i in range(limit_vocab_size):
-    f.write(words[i] + " " + " ".join([str(item) for item in emb[i]]) + "\n")
-  f.close()
-  if verbose: print f.name
-  if verbose: print "The temp filename is created:", os.path.isfile(f.name)
-  w2v_model = Word2Vec.load_word2vec_format(f.name)
-  os.remove(f.name)
-  return w2v_model
-"""
 
 def prep_embeddings_fast(ft, emb_func, limit_vocab_size=30000):
   w2v = Word2Vec()
@@ -368,7 +278,6 @@ def prep_embeddings_fast(ft, emb_func, limit_vocab_size=30000):
   w2v.index2word = ft.id2word[:size]
   w2v.vector_size = ft.D
   w2v.syn0 = emb
-  #w2v.syn0norm = np.linalg.norm(emb, axis=1, keepdims=False)
   dvocab = {}
   for word_id, word in enumerate(w2v.index2word):
     dvocab[word] = Vocab(index=word_id, count=ft.nwords - word_id)
@@ -389,7 +298,6 @@ def print_accuracy(model, questions_file, verbose=True):
   return (sem_acc, syn_acc)
 
 def analogy_eval_gensim_single(words, emb_func, ft=None, D=100, limit_vocab_size=30000, q_fname='/home/ubuntu/research/groupSparsityFastText/data/questions-words.txt', debug=False, verbose=0):
-  #w2v_model = prep_embeddings(words, emb_func, limit_vocab_size=limit_vocab_size, D=D, verbose=verbose)
   if verbose: print 'Using prep_embeddings_fast'
   w2v_model = prep_embeddings_fast(ft, emb_func, limit_vocab_size)
   sem_acc, syn_acc = print_accuracy(w2v_model, q_fname, verbose)
@@ -428,16 +336,11 @@ def norm_eval(models):
     mean = np.mean(norms)
     std = np.std(norms)
     df[name] = [mean, std]
-    
   return df
 
-#############
-
 def get_list_basenames(pattern, add_dot=False):
+  # adding dot - getting around the issue of '.' in model name
   list_files = glob.glob(pattern)
-  # this assumes there's only one dot ugh.
-  # need to get rid of just the last one
-  # ugh just please don't use "." anywhere in the modelname
   list_files_2 = [path.split('.')[0] for path in list_files]
   if not add_dot:
     print "Not Adding Dot -----"
@@ -483,7 +386,7 @@ def quantitative_eval(model_names, verbose=0):
   return df0
 
 def eval_ft(ft, name, verbose=0, which=['norm', 'wordsim'], wordrep=['sub', 'dout', 'din', 'combined'],
-  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS'],
+  wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW'],
   lower=True):
   print 'wordrep =', wordrep
   model_names = []
@@ -501,7 +404,6 @@ def eval_ft(ft, name, verbose=0, which=['norm', 'wordsim'], wordrep=['sub', 'dou
       if verbose: print 'Thres val =', thres_val
       tup = (_name, lambda x: ft.subword_rep_thres(x, thres=thres_val), ft, None)
     elif rep == 'combined':
-      # Note: combine sub with din
       tup = (_name, ft.combined_rep, ft, ft.subword_emb + ft.emb[:ft.nwords])
     ######
     model_names.append(tup)
@@ -567,8 +469,6 @@ def eval_dir(dir_pattern, verbose=0, which=['wordsim'], wordrep=['sub', 'dout', 
     print df
     dfs.append((basename, df))
   return dfs
-  #fts = get_fts(list_names, verbose)
-  #return eval_fts(fts, abbrev_names, verbose=verbose-1, wordrep=wordrep, lower=lower)
 
 def plot_norm(emb):
   # Given an ft, plot the norm of the embeddings
@@ -591,14 +491,8 @@ def emb_norm_plots(ft, name=None):
   plot_norm(ft.emb_out)
   print 'Subword Emb'
   plot_norm(ft.subword_emb)
-  # print 'Ngram Norm versus frequency'
-  # this one takes a while - develop a method to do this efficiently 
 
-
-
-
-#### Adding more tests for multi-rep
-def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS']):
+def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW']):
   return wordsim_eval([('sub', _ft.subword_rep),
                       ('sub2', lambda word: _ft.subword_rep(word, emb=_ft.emb2, subword_emb=_ft.subword_emb2)),
                       ('sub-maxsim', _ft.subword_rep_multi),
@@ -608,7 +502,7 @@ def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS
                      ], verbose=verbose,
                     wordsim_datasets=wordsim_datasets, lower=lower)
 
-def eval_multi_word(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW', 'SCWS']):
+def eval_multi_word(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW']):
   return wordsim_eval([ ('in', _ft.dict_rep),
                         ('in2', _ft.dict_rep2),
                         ('in-maxsim', _ft.dict_rep_multi),
@@ -651,9 +545,6 @@ def test_nn(ft, verbose=False, rep='subword', plot=False, num_nns=100):
       ft.show_nearest_neighbors(word, cl=0, emb_multi=ft.emb_multi_out, verbose=verbose, plot=plot, num_nns=num_nns)
       ft.show_nearest_neighbors(word, cl=1, emb_multi=ft.emb_multi_out, verbose=verbose, plot=plot, num_nns=num_nns)
 
-# Plotting alignment without the subword
-def plot_subword_alignment():
-  pass
 
 if __name__=="__main__":
   pass

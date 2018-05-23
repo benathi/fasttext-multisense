@@ -1,6 +1,11 @@
 .DS_Store
 *.o
-ftmulti
+multift
 sftp-config.json
-data/
+data/ukwac_wackypedia.txt
+data/itwac.txt
+data/frwac.txt
+data/dewac.txt
 *.pyc
+text8
+text9
