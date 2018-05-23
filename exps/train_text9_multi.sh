@@ -1,4 +1,4 @@
-# This is a sample script that trains the Gaussian mixture representation for multi-sense embeddings on text9
+# This is a sample script that trains the Gaussian mixture representations for multi-sense embeddings on text9.
 mkdir modelfiles
 ./multift skipgram -input "data/text9" -output modelfiles/multi_text9_e10_d300_vs2e-4_lr1e-5_margin1 -lr 1e-5 -dim 300 \
     -ws 10 -epoch 10 -minCount 5 -loss ns -bucket 2000000 \
