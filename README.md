@@ -21,8 +21,8 @@ make
 
 2. Obtain text data. We included scripts to download **text8** and **text9**. 
 ```
-bash get_text8.sh
-bash get_text9.sh
+bash data/get_text8.sh
+bash data/get_text9.sh
 ```
 In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our English text corpus. Both datasets can be requested [here](http://wacky.sslmit.unibo.it/doku.php?id=download).
 
