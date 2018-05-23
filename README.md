@@ -112,3 +112,18 @@ Top highest similarity of rock cl 1
 ## Download Pretrained Models
 
 ### English Model
+
+
+## Analyze FastText Object in Python
+We additionally provide a FastText python wrapper for the original FastText objects (for instance, models downloaded from ..) or our multisense-FastText objects. Our models are in the format that can be loaded by *multift.py* directly. One can also  convert FastText objects to our model format via:
+
+```
+./multift output-model modelfiles/downloaded_model.bin 
+```
+
+The models in our format will be saved in **modelfiles/downloaded_model.in**. This model can be loaded with our Python script using:
+```
+ft = multift.MultiFastText(basename=modelfiles/downloaded_model, multi=False)
+```
+
+Ben: test to make sure
