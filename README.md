@@ -1,7 +1,7 @@
 # Probabilistic FastText for Multi-Sense Word Embeddings
 This repository contains the implementation of the models in *[Athiwaratkun et al.](https://arxiv.org/abs/1704.08424), Probabilistic FastText for Multi-Sense Word Embeddings, ACL 2018*.
 
-We represent each word in the dictionary as a Gaussian Mixture distribution and train it using a max-margin objective based on expected likelihood kernel energy function.
+Similar to our previous work in *[Athiwaratkun and Wilson](https://arxiv.org/abs/1704.08424), Multimodal Word Distributions, ACL 2017*, we represent each word in the dictionary as a Gaussian Mixture distribution that can extract multiple meanings. We use FastText as our subword representation to enhance semantic estimation of rare words or words outside the training vocabulary. 
 
 The BibTeX entry for the paper is:
 
