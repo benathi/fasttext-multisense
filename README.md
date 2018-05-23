@@ -59,5 +59,7 @@ We can query for nearest neighbors give a word or evaluate the embeddings agains
 
 ```
 python eval/eval_text9_model_nn.py | tee log/eval_text9_model_nn.txt
-python eval/eval_text9_model_wordsim.py | tee log/eval_text9_model_wordsim.txt
+
+python eval/eval_model_wordsim.py --modelname modelfiles/multi_text8_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text8.txt
+python eval/eval_model_wordsim.py --modelname modelfiles/multi_text9_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text9.txt
 ```
