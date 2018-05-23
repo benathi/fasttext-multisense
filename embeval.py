@@ -15,7 +15,6 @@ import multift
 ## 1. Evaluation Data Loading
 def load_SimLex999():
     _fpath = os.path.join('data/word_similarity_datasets/', 'SimLex-999.txt')
-    #_fpath = filepath if filepath is not None else os.environ['SIMLEX999_FILE']
     df = pd.read_csv(_fpath, delimiter='\t')
     word1 = df['word1'].tolist()
     word2 = df['word2'].tolist()
