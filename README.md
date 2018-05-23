@@ -18,8 +18,9 @@ We provide
 ```
 make
 ```
+This command will generate *multift*, an executable of our model for training and loading existing models. 
 
-2. Obtain text data. We included scripts to download **text8** and **text9**. 
+2. Obtain text data. We included scripts to download **text8** and **text9** in **data/**.
 ```
 bash data/get_text8.sh
 bash data/get_text9.sh
@@ -27,8 +28,6 @@ bash data/get_text9.sh
 In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our English text corpus. Both datasets can be requested [here](http://wacky.sslmit.unibo.it/doku.php?id=download).
 
 The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (French) can be requested using the above link as well. 
-
-**Note: add script to prepare ukWac + Wackypedia?**
 
 3. Run a sample script for *text8* or *text9*.
 ```
@@ -45,7 +44,8 @@ modelname.in2       The embeddings for the second Gaussian component.
 modelname.subword   The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module.
 ```
 
-## Evaluate Pretrained Models
+
+## Evaluate  Models
 
 1. The provided python module **multift.py** can be used to load the multisense FT object. 
 
@@ -63,3 +63,8 @@ python eval/eval_text9_model_nn.py | tee log/eval_text9_model_nn.txt
 python eval/eval_model_wordsim.py --modelname modelfiles/multi_text8_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text8.txt
 python eval/eval_model_wordsim.py --modelname modelfiles/multi_text9_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text9.txt
 ```
+
+
+## Download Pretrained Models
+
+### English Model
