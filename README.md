@@ -1,6 +1,18 @@
 # Probabilistic FastText for Multi-Sense Embeddings
 
-## Getting Started
+## What's in this Library?
+
+We provide 
+
+(1) scripts to train the multi-sense FastText embedding in *src*. We provide instructions on how to train the model below. 
+
+(2) scripts to load the pre-trained models and evaluate.
+
+(3) We provide scripts to convert pre-trained FastText model (single sense) into Python as well. 
+--- Ben: provide usage ---
+
+
+## Training
 
 1. Compile the C++ files.
 ```
@@ -11,8 +23,11 @@ make
 ```
 bash get_text9.sh
 ```
+In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our English text corpus. Both datasets can be requested [here](http://wacky.sslmit.unibo.it/doku.php?id=download).
 
-3. Run a sample script.
+The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (French) can be requested using the above link as well. 
+
+3. Run a sample script for *text8* or *text9*.
 ```
 bash exps/train_text9_multi.sh
 ```
@@ -21,19 +36,23 @@ After the training is complete, the following model files will be saved:
 model.words     List of words in the dictionary
 model.bin       A binary file for the subword embedding model
 model.in        The subword embeddings
-model.in2       The subword embeddings for the second component.
+model.in2       The embeddings for the second Gaussian component.
 model.subword   The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module.
 
-4. The provided python module **multift.py** can be used to load the multisense FT object. 
 
+## Evaluate Pretrained Models
+
+1. The provided python module **multift.py** can be used to load the multisense FT object. 
+
+```
 ft = multift.MultiFastText(basename="", multi=True)
+```
 
-We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. See the code for the API.
+We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. ***See the code for the API. ---- Show sample code instead. ***
 
-5. Sample scripts **eval/eval_text9_model_nn.py** and **eval/eval_text9_model_wordsim.py** show the nearest neighbors and the word similarity respectively. 
+2. Sample scripts **eval/eval_text9_model_nn.py** and **eval/eval_text9_model_wordsim.py** show the nearest neighbors and the word similarity respectively. 
 
 ```
 python eval/eval_text9_model_nn.py | tee log/eval_text9_model_nn.txt
 python eval/eval_text9_model_wordsim.py | tee log/eval_text9_model_wordsim.txt
 ```
-
