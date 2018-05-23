@@ -8,14 +8,13 @@ import scipy
 BOW = "<"
 EOW = ">"
 
-# This method does not output the entire word
 def computeNgrams(word, minn=3, maxn=6, bucket=2000000):
     ngram_hashes = []
     ngrams = []
     for i, cc in enumerate(word):
       c = ord(cc)
       ngram = ""
-      if ((c & 0xC0) == 0x80): continue # What is the meaning of this one?
+      if ((c & 0xC0) == 0x80): continue
       j = i
       n = 1
       while j < len(word) and n <= maxn:
@@ -28,14 +27,13 @@ def computeNgrams(word, minn=3, maxn=6, bucket=2000000):
           h = hash(ngram) % bucket
           ngram_hashes.append(h)
           ngrams.append(ngram)
-        # end of while loop
         n += 1
     return ngram_hashes, ngrams
 
 class MultiFastText:
   def __init__(self, basename, minn=3, maxn=6, bucket=2000000, cache=True, verbose=False,
     dein=True, multi=False, savevec=False):
-    if verbose: print("Constructing FastText: Basename = {}".format(basename))
+    if verbose: print("Constructing MultiFt Object: Basename = {}".format(basename))
     self.basename = basename
     self.bucket = bucket
     self.cache = cache
@@ -47,7 +45,6 @@ class MultiFastText:
     self.dein = True   # original ft
     self.deout = False # original ft
     if "no-dein" in basename:
-      # TODO - find a better way to do this
       print "Setting dein = False based on the basename"
       self.dein = False
 
@@ -61,8 +58,9 @@ class MultiFastText:
     if verbose: print "Loading Emb In"
     self.emb = self.load_emb_in(in_fname)
 
-    self.mv = False # multi-vector
     # meaning that for multi-prototype, the second cluster uses vector representation
+    # For our models in the paper, mv=True (will be set to true later in load_emb_in())
+    self.mv = False # multi-vector
 
     if multi:
       self.num_mixtures = 2
@@ -159,7 +157,6 @@ class MultiFastText:
       if verbose: print 'Loading Cached Subword Embeddings'
       subword_emb = np.load(basename + suffix)
       return subword_emb
-    # else, do the computation
     if verbose: print 'Caching Subword Embeddings'
     subword_emb = np.zeros((self.nwords, self.D))
     for i, word in enumerate(self.id2word):
@@ -227,7 +224,6 @@ class MultiFastText:
           self.nwords + self.bucket)
 
     else:
-      # if self.maxn == 0
       assert emb.shape[0] == self.nwords, "For model with maxn=0, we expect the number of rows {} to be the number of words {}".format(
         emb.shape[0], self.nwords)
     assert emb.shape[1] == self.D
@@ -246,9 +242,7 @@ class MultiFastText:
     ngrams += _ngrams
     ngram_idxs += [self.nwords + hh for hh in _ngram_hashes]
     return ngram_idxs, ngrams
-    
-  # This is the ProbFastText subword representation!
-  # There's a word itself in it too!
+  
   def subword_rep(self, words, emb=None, subword_emb=None, verbose=0):
     if emb is None:
       emb = self.emb
@@ -278,7 +272,7 @@ class MultiFastText:
       for i, word in enumerate(words):
         if word not in self.word2id or not self.cache:
           ngram_idxs, _ = self.getNgrams(word)
-          # BenA: do not include the word itself (first index) in the average
+          # Do not include the word itself (first index) in the average
           if not self.dein:
             ngram_idxs = ngram_idxs[1:]
           for idx in ngram_idxs:
@@ -293,16 +287,13 @@ class MultiFastText:
     vecs2, _ = self.subword_rep(words, emb=self.emb2, subword_emb=self.subword_emb2)
     return np.stack([vecs, vecs2], axis=1), np.array([1]*vecs.shape[0], dtype=bool)
 
-  ####### BenA
   # only supporting one word lookup
   # If the ngram norm is less than thres, do not add it
-  # another way to threshold is to calculate the angle with respect to the sum
   def subword_rep_thres(self, word, verbose=0, thres=0.05):
-    #print 'At subword_rep_thres: Threshold = ', thres
     if type(word) is str:
       assert len(word) >= 1
       ngram_idxs, _ = self.getNgrams(word)
-      # BenA: do not include the word itself (first index) in the average
+      # Do not include the word itself (first index) in the average
       if not self.dein:
           ngram_idxs = ngram_idxs[1:]
       vec = np.zeros((self.D))
@@ -321,12 +312,11 @@ class MultiFastText:
         vecs[i], _ = self.subword_rep_thres(word[i], thres=thres, verbose=verbose)
       return vecs, np.array([True]*len(word))
 
-  # BenA
   def subword_rep_cos_thres(self, word, verbose=0, thres=0.0):
     if type(word) is str:
       assert len(word) >= 1
       ngram_idxs, _ = self.getNgrams(word)
-      # BenA: do not include the word itself (first index) in the average
+      # Do not include the word itself (first index) in the average
       if not self.dein:
         ngram_idxs = ngram_idxs[1:]
       vec_temp = np.zeros((self.D))
@@ -350,7 +340,6 @@ class MultiFastText:
       return vecs, np.array([True]*len(word))
 
   def combined_rep(self, word, verbose=0):
-    # TODO - handling threshold later when we need it
     vec, indic = self.dict_rep(word)
     vec_, _ = self.subword_rep(word)
     vec += vec_
@@ -512,7 +501,6 @@ class MultiFastText:
     idx = idx_or_word
     if idx_or_word in self.word2id:
         idx = self.word2id[idx_or_word]
-    #dist = np.dot(emb_multi, emb_multi[idx*self.num_mixtures + cl])
     dist = np.dot(emb_multi, emb_multi[idx*self.num_mixtures + cl])/(np.linalg.norm(emb_multi, axis=1)*np.linalg.norm(emb_multi[idx*self.num_mixtures + cl]))
     highsim_idxs = dist.argsort()[::-1]
     # select top num_nns (linear) indices with the highest cosine similarity
@@ -536,7 +524,6 @@ class MultiFastText:
     # select top num_nns (linear) indices with the highest cosine similarity
     highsim_idxs = highsim_idxs[:num_nns]
     dist_val = dist[highsim_idxs]
-    #words = self.idxs2words(highsim_idxs)
     print highsim_idxs
     words = ["{}".format(self.id2word[idx]) for idx in highsim_idxs]
     
@@ -571,57 +558,5 @@ def main():
   vecs = ft.subword_rep(words)
   output_embs(words, vecs)
 
-def test():
-  #ft = FastText("test_charrep_input.txt", "test_dictrep.txt")
-  ft = MultiFastText("../.ngrams");
-  verbose = False
-  print "beautiful", ft.subword_rep("beautiful", verbose)
-  print "asparagus", ft.subword_rep("asparagus", verbose)
-  print "pidgey", ft.subword_rep("pidgey", verbose)
-  print "yellow", ft.subword_rep("yellow", verbose)
-  print "the", ft.subword_rep("the", verbose)
-  print "who", ft.subword_rep("who", verbose)
-  #print computeNgrams("love")
-  #print computeNgrams("beautiful")
-
-def test2():
-  #ft = FastText("../../originalFastText/.ngrams")
-  ft = FastText("test_charrep_input.txt")
-  #ft.bucket = 2000000
-  ft.subword_rep("who", 1)
-
-def test3():
-  # passed!
-  ft = FastText(char_fname="test_charrep_input.txt", word_fname="test_dictrep.txt", bucket=2)
-  print ft.subword_rep("who", 1)
-  return ft
-
-def test4():
-  ft = FastText(char_fname="../../originalFastText/.ngrams", word_fname="../../originalFastText/.dict_in")
-  print ft.subword_rep("who", 1)
-
-def test5():
-  #ft = FastText(basename="../modelfiles/v9/modelv9_fil9-gs0.0-co") # passed
-  ft = FastText(basename="../../originalFastText/") # these are from originalFastText/result/fil9.bin
-  print ft.subword_rep("who", 1)
-
-
-def test_np_loader():
-  import timeit
-  start_time = timeit.default_timer()
-  #FastText(basename="../data/pre-trained-fasttext/wiki.en")
-  FastText(basename="../fastText/modelfiles/original_fasttext_wiki")
-  elased = timeit.default_timer()
-  print "Elapsed time", elased
-
-# Test loading method as of July 17
-def test_np_loader3():
-  import timeit
-  start_time = timeit.default_timer()
-  FastText(basename="../fastText/modelfiles/original_fasttext_wiki", cache=False)
-  elased = timeit.default_timer()
-  print "Elapsed time", elased
-
 if __name__ == "__main__":
   pass
-  test_np_loader3()
