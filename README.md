@@ -44,9 +44,11 @@ model.subword   The final representation of words in the dictionary. Note that t
 
 1. The provided python module **multift.py** can be used to load the multisense FT object. 
 
+```
 ft = multift.MultiFastText(basename="", multi=True)
+```
 
-We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. See the code for the API.
+We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. ***See the code for the API. ---- Show sample code instead. ***
 
 2. Sample scripts **eval/eval_text9_model_nn.py** and **eval/eval_text9_model_wordsim.py** show the nearest neighbors and the word similarity respectively. 
 
