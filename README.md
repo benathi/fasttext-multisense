@@ -35,14 +35,15 @@ The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (
 bash exps/train_text8_multi.sh
 bash exps/train_text9_multi.sh
 ```
-After the training is complete, the following model files will be saved:
+After the training is complete, the following files will be saved:
 
-model.words     List of words in the dictionary
-model.bin       A binary file for the subword embedding model
-model.in        The subword embeddings
-model.in2       The embeddings for the second Gaussian component.
-model.subword   The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module.
-
+```
+modelname.words     List of words in the dictionary
+modelname.bin       A binary file for the subword embedding model
+modelname.in        The subword embeddings
+modelname.in2       The embeddings for the second Gaussian component.
+modelname.subword   The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module.
+```
 
 ## Evaluate Pretrained Models
 
