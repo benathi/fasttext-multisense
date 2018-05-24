@@ -55,11 +55,9 @@ class Model {
     Vector output_;
     Vector grad_;
     Vector grad2_;
-    Vector temp_; // BenA:
-    // For variance
+    Vector temp_;
     Vector gradvar_;
     Vector gradvar2_;
-    // 
     int32_t hsz_;
     int32_t osz_;
     real loss_;
@@ -84,9 +82,6 @@ class Model {
     static const int32_t NEGATIVE_TABLE_SIZE = 10000000;
 
   public:
-    /*Model(std::shared_ptr<Matrix>, std::shared_ptr<Matrix>,
-          std::shared_ptr<Matrix>, std::shared_ptr<Matrix>,
-          std::shared_ptr<Args>, int32_t);*/
     Model(std::shared_ptr<Matrix>,
              std::shared_ptr<Matrix>,
              std::shared_ptr<Matrix>, 
@@ -134,7 +129,6 @@ class Model {
     bool quant_;
     void setQuantizePointer(std::shared_ptr<QMatrix>, std::shared_ptr<QMatrix>, bool);
     void groupSparsityRegularization(int, int, int, double);
-    //void groupSparsityRegularization();
     real groupSparsityRegularization(double, int32_t);
 
     real elk(int32_t, bool, real);
@@ -146,7 +140,6 @@ class Model {
     std::vector<float> energy_expdot(int32_t);
     real partial_energy_expdot(Vector& , Vector& , std::shared_ptr<Matrix> , int32_t );
 
-    // Adding variance
     real negativeSamplingMultiVecVar(int32_t, int32_t, real);
     real partial_energy_vecvar(Vector& , Vector& , std::shared_ptr<Matrix>, int32_t, int32_t, std::shared_ptr<Matrix>, std::shared_ptr<Matrix>);
     std::vector<float> energy_vecvar(int32_t, int32_t);

@@ -46,7 +46,6 @@ class FastText {
     std::shared_ptr<Matrix> input2_;
     std::shared_ptr<Matrix> output2_;
 
-    // Feb6
     std::shared_ptr<Matrix> inputvar_;
     std::shared_ptr<Matrix> outputvar_;
     std::shared_ptr<Matrix> input2var_;

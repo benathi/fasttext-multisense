@@ -384,9 +384,10 @@ def quantitative_eval(model_names, verbose=0):
   df0 = df10.append(df2)
   return df0
 
-def eval_ft(ft, name, verbose=0, which=['norm', 'wordsim'], wordrep=['sub', 'dout', 'din', 'combined'],
+def eval_ft(ft, name, verbose=0, which=['wordsim'], wordrep=['sub'],
   wordsim_datasets=['SL', 'WS', 'WS-S', 'WS-R', 'MEN', 'MC', 'RG', 'YP', 'MT-287', 'MT-771', 'RW'],
   lower=True):
+  # wordrep=['sub', 'dout', 'din', 'combined']
   print 'wordrep =', wordrep
   model_names = []
   for rep in wordrep:
@@ -495,9 +496,9 @@ def eval_multi(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS', 'WS
   return wordsim_eval([('sub', _ft.subword_rep),
                       ('sub2', lambda word: _ft.subword_rep(word, emb=_ft.emb2, subword_emb=_ft.subword_emb2)),
                       ('sub-maxsim', _ft.subword_rep_multi),
-                      ('out', _ft.dict_rep_out),
-                      ('out2', _ft.dict_rep_out2),
-                      ('out-maxsim', _ft.dict_rep_out_multi)
+                      #('out', _ft.dict_rep_out),
+                      #('out2', _ft.dict_rep_out2),
+                      #('out-maxsim', _ft.dict_rep_out_multi)
                      ], verbose=verbose,
                     wordsim_datasets=wordsim_datasets, lower=lower)
 
@@ -505,9 +506,9 @@ def eval_multi_word(_ft, verbose=False, lower=True, wordsim_datasets=['SL', 'WS'
   return wordsim_eval([ ('in', _ft.dict_rep),
                         ('in2', _ft.dict_rep2),
                         ('in-maxsim', _ft.dict_rep_multi),
-                      ('out', _ft.dict_rep_out),
-                      ('out2', _ft.dict_rep_out2),
-                      ('out-maxsim', _ft.dict_rep_out_multi)
+                      #('out', _ft.dict_rep_out),
+                      #('out2', _ft.dict_rep_out2),
+                      #('out-maxsim', _ft.dict_rep_out_multi)
                      ], verbose=verbose,
                     wordsim_datasets=wordsim_datasets, lower=lower)
 

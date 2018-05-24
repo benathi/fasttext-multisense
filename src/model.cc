@@ -16,35 +16,11 @@
 #include <cmath>
 
 namespace fasttext {
-/*
-Model::Model(std::shared_ptr<Matrix> wi,
-             std::shared_ptr<Matrix> wo,
-             std::shared_ptr<Matrix> wi2, // new
-             std::shared_ptr<Matrix> wo2, // new
-             std::shared_ptr<Args> args,
-             int32_t seed)
-  : hidden_(args->dim), hidden2_(args->dim), output_(wo->m_),
-  grad_(args->dim), grad2_(args->dim), temp_(args->dim), rng(seed), quant_(false)
-{
-  wi_ = wi;
-  wo_ = wo;
-  wi2_ = wi2;
-  wo2_ = wo2;
-
-  args_ = args;
-  osz_ = wo->m_; // This is the number of rows for wout
-  hsz_ = args->dim;
-  negpos = 0;
-  loss_ = 0.0;
-  nexamples_ = 1;
-  initSigmoid();
-  initLog();
-}*/
 
 Model::Model(std::shared_ptr<Matrix> wi,
              std::shared_ptr<Matrix> wo,
-             std::shared_ptr<Matrix> wi2, // new
-             std::shared_ptr<Matrix> wo2, // new
+             std::shared_ptr<Matrix> wi2,
+             std::shared_ptr<Matrix> wo2,
              // for variance
              std::shared_ptr<Matrix> invar,
              std::shared_ptr<Matrix> invar2,
@@ -66,7 +42,7 @@ Model::Model(std::shared_ptr<Matrix> wi,
   outvar2_ = outvar2;
 
   args_ = args;
-  osz_ = wo->m_; // This is the number of rows for wout
+  osz_ = wo->m_;
   hsz_ = args->dim;
   negpos = 0;
   loss_ = 0.0;
@@ -102,37 +78,17 @@ real Model::binaryLogistic(int32_t target, bool label, real lr) {
 }
 
 real Model::elk(int32_t target, bool label, real lr) {
-  // This replaces the binaryLogistic method
-  // performs gradient update for *in* 
-  // The label has no effect actually
-  //real score = wo_->getRow(target) - hidden;
-  //return score;
+  // not used
   return 0.0;
 }
 
 real Model::negativeSampling(int32_t target, real lr) {
   // loss is the negative of similarity here
-  //real sim = 0.0;
   grad_.zero();
   real sim1 = 0.0;
-  //real sim1 = elk(target, true, lr);
   real sim2 = 0.0;
-  //real scale = lr*args_->var_scale; // change this to below
   real scale = lr/(args_->var_scale);
   int32_t negTarget = getNegative(target);
-
-  // Note: assume one negative sample!
-  //for (int32_t n = 0; n <= args_->neg; n++) {
-  //sim2 = elk(getNegative(target), false, lr);
-  //}
-
-  //for (int32_t n = 0; n <= args_->neg; n++) {
-    //if (n == 0) {
-    //  //loss += binaryLogistic(target, true, lr);
-    //} else {
-    //  //loss += binaryLogistic(getNegative(target), false, lr);
-    //}
-  //}
 
   // We're not using the method ELK
 
@@ -151,21 +107,17 @@ real Model::negativeSampling(int32_t target, real lr) {
     // Update wo_ itself
     hidden_.addRow(*wo_, target, -1.); // mu - v_out
     // calculate the loss based on the norm
-    //sim1 = - args_->var_scale*(hidden_.normsq())
     wo_->addRow(hidden_, target, scale); // 
     hidden_.addRow(*wo_, target, 1.); // mu
     hidden_.addRow(*wo_, negTarget, -1.); // mu - v_out_neg
-    //sim2 = - args_->var_scale*(hidden_.normsq())
     wo_->addRow(hidden_, negTarget, -scale);
     hidden_.addRow(*wo_, negTarget, 1.); // mu
   }
   return std::max((real) 0.0, loss);
 }
 
-// TOTO
 real Model::negativeSamplingSingleExpdot(int32_t target, real lr) {
   // loss is the negative of similarity here
-  //real sim = 0.0;
   grad_.zero();
   real sim1 = 0.0;
   real sim2 = 0.0;
@@ -181,20 +133,15 @@ real Model::negativeSamplingSingleExpdot(int32_t target, real lr) {
     grad_.addRow(*wo_, negTarget, -scale);
     
     // Update wo_ itself
-    //hidden_.addRow(*wo_, target, -1.); // mu - v_out
     // calculate the loss based on the norm
     wo_->addRow(hidden_, target, scale);
-    //hidden_.addRow(*wo_, target, 1.); // mu
-    //hidden_.addRow(*wo_, negTarget, -1.); // mu - v_out_neg
     wo_->addRow(hidden_, negTarget, -scale);
-    //hidden_.addRow(*wo_, negTarget, 1.); // mu
   }
   return std::max((real) 0.0, loss);
 }
 
 
 // This is for multiple prototype!
-
 real Model::partial_energy(Vector& hidden, Vector& grad, std::shared_ptr<Matrix> wo, int32_t target){
   hidden.addRow(*wo, target, -1.); // mu - v_out
   real sim = - (0.5/args_->var_scale)*(hidden.normsq());
@@ -204,7 +151,6 @@ real Model::partial_energy(Vector& hidden, Vector& grad, std::shared_ptr<Matrix>
 
 std::vector<float> Model::energy(int32_t target){
   real sim = 0.0;
-  //real max_pe = 0.0;
   real sim00 = 0.0;
   real sim01 = 0.0;
   real sim10 = 0.0;
@@ -212,7 +158,6 @@ std::vector<float> Model::energy(int32_t target){
 
   for(int i=0; i<2; i++){
     for(int j=0; j<2; j++){
-      //int idx = i*2 + j;
       if (i==0 and j ==0){
         sim00 = partial_energy(hidden_, grad_, wo_, target);
       } else if (i==0 and j==1){ 
@@ -257,7 +202,6 @@ real Model::partial_energy_expdot(Vector& hidden, Vector& grad, std::shared_ptr<
 // This should be the same as the energy expdot actually
 std::vector<float> Model::energy_expdot(int32_t target){
   real sim = 0.0;
-  //real max_pe = 0.0;
   real sim00 = 0.0;
   real sim01 = 0.0;
   real sim10 = 0.0;
@@ -265,7 +209,6 @@ std::vector<float> Model::energy_expdot(int32_t target){
 
   for(int i=0; i<2; i++){
     for(int j=0; j<2; j++){
-      //int idx = i*2 + j;
       if (i==0 and j ==0){
         sim00 = partial_energy_expdot(hidden_, grad_, wo_, target);
       } else if (i==0 and j==1){ 
@@ -372,7 +315,6 @@ real Model::negativeSamplingMulti(int32_t target, real lr){
   std::vector<float> eplus_result = energy(target);
   int32_t negTarget = getNegative(target);
   std::vector<float> eminus_result = energy(negTarget);
-  //std::cout << "Test" << std::endl;
   real loss = args_->margin - eplus_result.at(2) + eminus_result.at(2);
   if (loss > 0.0){
     // 2. The goal is to update grad_ and grad2_
@@ -470,7 +412,6 @@ real Model::negativeSamplingMulti(int32_t target, real lr){
     temp_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1));
     wo2_->addRow(temp_, negTarget, -inv_sum_eminus);
   }
-  //std::cout << "loss = " << loss << std::endl;
   return std::max((real) 0.0, loss);
 }
 
@@ -481,7 +422,6 @@ real Model::negativeSamplingMultiVec2(int32_t target, real lr){
   std::vector<float> eplus_result = energy(target);
   int32_t negTarget = getNegative(target);
   std::vector<float> eminus_result = energy(negTarget);
-  //std::cout << "Test" << std::endl;
   real loss = args_->margin - eplus_result.at(2) + eminus_result.at(2);
   if (loss > 0.0){
     // 2. The goal is to update grad_ and grad2_
@@ -579,11 +519,9 @@ real Model::negativeSamplingMultiVec2(int32_t target, real lr){
     temp_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1));
     wo2_->addRow(temp_, negTarget, -inv_sum_eminus);
   }
-  //std::cout << "loss = " << loss << std::endl;
   return std::max((real) 0.0, loss);
 }
 
-// BenA: this is the expdot experiment
 real Model::negativeSamplingMultiVecExpdot(int32_t target, real lr){
   grad_.zero();
   grad2_.zero();
@@ -591,7 +529,6 @@ real Model::negativeSamplingMultiVecExpdot(int32_t target, real lr){
   std::vector<float> eplus_result = energy_expdot(target);
   int32_t negTarget = getNegative(target);
   std::vector<float> eminus_result = energy_expdot(negTarget);
-  //std::cout << "Test" << std::endl;
   real loss = args_->margin - eplus_result.at(2) + eminus_result.at(2);
   if (loss > 0.0){
     // 2. The goal is to update grad_ and grad2_
@@ -618,50 +555,27 @@ real Model::negativeSamplingMultiVecExpdot(int32_t target, real lr){
     xi_minus.push_back(vm1);
     xi_minus.push_back(vm2);
 
-    // BenA: 
-    /*
-    grad_ and grad2_ are (negative scaled) gradient that will be used to upgrade 
-    the 'in' embeddings
-    
-    j=0 -> contribution from wo_ (the first component of out)
-    j=1 -> contribution from wo2_ (the second component of out)
-
-    context j+ -> this means it's the contribution from the positive context
-    context j- -> this means it's the contribution from the negative context
-    
-    then the 'out' embeddings are updated directly
-
-    */
-
     // (1) Update grad_
     // Do it for context j+
     // j=0
-    //grad_.addVector(hidden_, xi_plus.at(0).at(0)*inv_sum_eplus);
     grad_.addRow(*wo_, target, -xi_plus.at(0).at(0)*inv_sum_eplus);
 
     // j=1
-    //grad_.addVector(hidden_, xi_plus.at(0).at(1)*inv_sum_eplus);
     grad_.addRow(*wo2_, target, -xi_plus.at(0).at(1)*inv_sum_eplus);
 
     // Do it for context j-
-    //grad_.addVector(hidden_, -xi_minus.at(0).at(0)*inv_sum_eminus);
     grad_.addRow(*wo_, negTarget, xi_minus.at(0).at(0)*inv_sum_eminus);
     // j=1
-    //grad_.addVector(hidden_, -xi_minus.at(0).at(1)*inv_sum_eminus);
     grad_.addRow(*wo2_, negTarget, xi_minus.at(0).at(1)*inv_sum_eminus);
 
     // (2) Update grad2_
-    //grad2_.addVector(hidden2_, xi_plus.at(1).at(0)*inv_sum_eplus);
     grad2_.addRow(*wo_, target, -xi_plus.at(1).at(0)*inv_sum_eplus);
     // j=1
-    //grad2_.addVector(hidden2_, xi_plus.at(1).at(1)*inv_sum_eplus);
     grad2_.addRow(*wo2_, target, -xi_plus.at(1).at(1)*inv_sum_eplus);
 
     // Do it for context j-   
-    //grad2_.addVector(hidden2_, -xi_minus.at(1).at(0)*inv_sum_eminus);
     grad2_.addRow(*wo_, negTarget, xi_minus.at(1).at(0)*inv_sum_eminus);
     // j=1
-    //grad2_.addVector(hidden2_, -xi_minus.at(1).at(1)*inv_sum_eminus);
     grad2_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1)*inv_sum_eminus);
 
     ///////////////////////////////
@@ -669,43 +583,34 @@ real Model::negativeSamplingMultiVecExpdot(int32_t target, real lr){
     temp_.zero();
     // from i=0
     temp_.addVector(hidden_, -xi_plus.at(0).at(0));
-    //temp_.addRow(*wo_, target, xi_plus.at(0).at(0));
     // from i=1
     temp_.addVector(hidden2_, -xi_plus.at(1).at(0));
-    //temp_.addRow(*wo_, target, xi_plus.at(1).at(0));
     wo_->addRow(temp_, target, inv_sum_eplus);
     
     // (4) Update wo2[target]     --- this involves eplus
     temp_.zero();
     // from i=0
     temp_.addVector(hidden_, -xi_plus.at(0).at(1));
-    //temp_.addRow(*wo2_, target, xi_plus.at(0).at(1));
     // from i=1
     temp_.addVector(hidden2_, -xi_plus.at(1).at(1));
-    //temp_.addRow(*wo2_, target, xi_plus.at(1).at(1));
     wo2_->addRow(temp_, target, inv_sum_eplus);
 
     // (5) Update wo_[negTarget]  --- this involves eminus
     temp_.zero();
     // from i=0
     temp_.addVector(hidden_, -xi_minus.at(0).at(0));
-    //temp_.addRow(*wo_, negTarget, xi_minus.at(0).at(0));
     // from i=1
     temp_.addVector(hidden2_, -xi_minus.at(1).at(0));
-    //temp_.addRow(*wo_, negTarget, xi_minus.at(1).at(0));
     wo_->addRow(temp_, negTarget, -inv_sum_eminus);
     
     // (6) Update wo2_[negTarget] --- this involves eminus
     temp_.zero();
     // from i=0
     temp_.addVector(hidden_, -xi_minus.at(0).at(1));
-    //temp_.addRow(*wo2_, negTarget, xi_minus.at(0).at(1));
     // from i=1
     temp_.addVector(hidden2_, -xi_minus.at(1).at(1));
-    //temp_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1));
     wo2_->addRow(temp_, negTarget, -inv_sum_eminus);
   }
-  //std::cout << "loss = " << loss << std::endl;
   return std::max((real) 0.0, loss);
 }
 
@@ -719,12 +624,9 @@ real Model::negativeSamplingMultiVecVar(int32_t wordidx, int32_t target, real lr
   std::vector<float> eplus_result = energy_vecvar(wordidx, target);
   int32_t negTarget = getNegative(target);
   std::vector<float> eminus_result = energy_vecvar(wordidx, negTarget);
-  //std::cout << "Test" << std::endl;
   real loss = args_->margin - eplus_result.at(2) + eminus_result.at(2);
   if (loss > 0.0){
     // 2. The goal is to update grad_ and grad2_
-    //real inv_sum_eplus = lr*(1./eplus_result.at(1))*(-1./args_->var_scale); // plus
-    //real inv_sum_eminus = lr*(1./eminus_result.at(1))*(-1./args_->var_scale); // minus
     real inv_sum_eplus  = lr*(1./eplus_result.at(1));
     real inv_sum_eminus = lr*(1./eminus_result.at(1));
 
@@ -868,79 +770,55 @@ real Model::negativeSamplingMultiVecVar(int32_t wordidx, int32_t target, real lr
     temp_.mulExpRow(*outvar2_, negTarget);
     outvar2_->addRow(temp_, negTarget, 1.);
     }
-    //real inv_sum_eplus = lr*(1./eplus_result.at(1))*(-1./args_->var_scale); // plus
-    //real inv_sum_eminus = lr*(1./eminus_result.at(1))*(-1./args_->var_scale); // minus
-    //inv_sum_eplus *= -1;
-    //inv_sum_eminus *= -1;
-    // Need to multiple with 1/(d_i + d_j)
 
     // (1) Update grad_
     // Do it for context j+
     // j=0
-    //grad_.addVector(hidden_, xi_plus.at(0).at(0)*inv_sum_eplus);
-    //grad_.addRow(*wo_, target, -xi_plus.at(0).at(0)*inv_sum_eplus);
     for (int64_t ii = 0; ii < grad_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar_->at(target, ii)));
       grad_.data_[ii] += inv_sum_eplus*xi_plus.at(0).at(0)*(-invsumd*(hidden_.data_[ii] - wo_->at(target, ii)));
     }
     // j=1
-    //grad_.addVector(hidden_, xi_plus.at(0).at(1)*inv_sum_eplus);
-    //grad_.addRow(*wo2_, target, -xi_plus.at(0).at(1)*inv_sum_eplus);
     for (int64_t ii = 0; ii < grad_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar2_->at(target, ii)));
       grad_.data_[ii] += inv_sum_eplus*xi_plus.at(0).at(1)*(-invsumd*(hidden_.data_[ii] - wo2_->at(target, ii)));
     }
 
     // Do it for context j-
-    //grad_.addVector(hidden_, -xi_minus.at(0).at(0)*inv_sum_eminus);
-    //grad_.addRow(*wo_, negTarget, xi_minus.at(0).at(0)*inv_sum_eminus);
     for (int64_t ii = 0; ii < grad_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar_->at(negTarget, ii)));
       grad_.data_[ii] += -inv_sum_eminus*xi_minus.at(0).at(0)*(-invsumd*(hidden_.data_[ii] - wo_->at(negTarget, ii)));
     }
     
     // j=1
-    //grad_.addVector(hidden_, -xi_minus.at(0).at(1)*inv_sum_eminus);
-    //grad_.addRow(*wo2_, negTarget, xi_minus.at(0).at(1)*inv_sum_eminus);
     for (int64_t ii = 0; ii < grad_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar2_->at(negTarget, ii)));
       grad_.data_[ii] += -inv_sum_eminus*xi_minus.at(0).at(1)*(-invsumd*(hidden_.data_[ii] - wo2_->at(negTarget, ii)));
     }
 
     // (2) Update grad2_
-    //grad2_.addVector(hidden2_, xi_plus.at(1).at(0)*inv_sum_eplus);
-    //grad2_.addRow(*wo_, target, -xi_plus.at(1).at(0)*inv_sum_eplus);
     for (int64_t ii = 0; ii < grad2_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar_->at(target, ii)));
       grad2_.data_[ii] += inv_sum_eplus*xi_plus.at(1).at(0)*(-invsumd*(hidden2_.data_[ii] - wo_->at(target, ii)));
     }
     // j=1
-    //grad2_.addVector(hidden2_, xi_plus.at(1).at(1)*inv_sum_eplus);
-    //grad2_.addRow(*wo2_, target, -xi_plus.at(1).at(1)*inv_sum_eplus);
     for (int64_t ii = 0; ii < grad2_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar2_->at(target, ii)));
       grad2_.data_[ii] += inv_sum_eplus*xi_plus.at(1).at(1)*(-invsumd*(hidden2_.data_[ii] - wo2_->at(target, ii)));
     }
 
     // Do it for context j-   
-    //grad2_.addVector(hidden2_, -xi_minus.at(1).at(0)*inv_sum_eminus);
-    //grad2_.addRow(*wo_, negTarget, xi_minus.at(1).at(0)*inv_sum_eminus);
     for (int64_t ii = 0; ii < grad2_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar_->at(negTarget, ii)));
       grad2_.data_[ii] += -inv_sum_eminus*xi_minus.at(1).at(0)*(-invsumd*(hidden2_.data_[ii] - wo_->at(negTarget, ii)));
     }
 
     // j=1
-    //grad2_.addVector(hidden2_, -xi_minus.at(1).at(1)*inv_sum_eminus);
-    //grad2_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1)*inv_sum_eminus);
     for (int64_t ii = 0; ii < grad2_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar2_->at(negTarget, ii)));
       grad2_.data_[ii] += -inv_sum_eminus*xi_minus.at(1).at(1)*(-invsumd*(hidden2_.data_[ii] - wo2_->at(negTarget, ii)));
     }
 
-    // BenA - TODO after workout *
-    //inv_sum_eplus *= -1;
-    //inv_sum_eminus *= -1;
     ///////////////////////////////
     // (3) Update wo_[target]     --- this involves eplus
     temp_.zero();
@@ -949,29 +827,21 @@ real Model::negativeSamplingMultiVecVar(int32_t wordidx, int32_t target, real lr
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar_->at(target, ii)));
       temp_[ii] += xi_plus.at(0).at(0)*invsumd*(hidden_.data_[ii] - wo_->at(target, ii));
     }
-    //temp_.addVector(hidden_, -xi_plus.at(0).at(0));
-    //temp_.addRow(*wo_, target, xi_plus.at(0).at(0));
     // from i=1
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar_->at(target, ii)));
       temp_[ii] += xi_plus.at(1).at(0)*invsumd*(hidden2_.data_[ii] - wo_->at(target, ii));
     }
-    //temp_.addVector(hidden2_, -xi_plus.at(1).at(0));
-    //temp_.addRow(*wo_, target, xi_plus.at(1).at(0));
     wo_->addRow(temp_, target, inv_sum_eplus);
     
     // (4) Update wo2[target]     --- this involves eplus
     temp_.zero();
     // from i=0
-    //temp_.addVector(hidden_, -xi_plus.at(0).at(1));
-    //temp_.addRow(*wo2_, target, xi_plus.at(0).at(1));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar2_->at(target, ii)));
       temp_[ii] += xi_plus.at(0).at(1)*invsumd*(hidden_.data_[ii] - wo2_->at(target, ii));
     }
     // from i=1
-    //temp_.addVector(hidden2_, -xi_plus.at(1).at(1));
-    //temp_.addRow(*wo2_, target, xi_plus.at(1).at(1));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar2_->at(target, ii)));
       temp_[ii] += xi_plus.at(1).at(1)*invsumd*(hidden2_.data_[ii] - wo2_->at(target, ii));
@@ -981,15 +851,11 @@ real Model::negativeSamplingMultiVecVar(int32_t wordidx, int32_t target, real lr
     // (5) Update wo_[negTarget]  --- this involves eminus
     temp_.zero();
     // from i=0
-    //temp_.addVector(hidden_, -xi_minus.at(0).at(0));
-    //temp_.addRow(*wo_, negTarget, xi_minus.at(0).at(0));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar_->at(negTarget, ii)));
       temp_[ii] += xi_minus.at(0).at(0)*invsumd*(hidden_.data_[ii] - wo_->at(negTarget, ii));
     }
     // from i=1
-    //temp_.addVector(hidden2_, -xi_minus.at(1).at(0));
-    //temp_.addRow(*wo_, negTarget, xi_minus.at(1).at(0));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar_->at(negTarget, ii)));
       temp_[ii] += xi_minus.at(1).at(0)*invsumd*(hidden2_.data_[ii] - wo_->at(negTarget, ii));
@@ -999,22 +865,17 @@ real Model::negativeSamplingMultiVecVar(int32_t wordidx, int32_t target, real lr
     // (6) Update wo2_[negTarget] --- this involves eminus
     temp_.zero();
     // from i=0
-    //temp_.addVector(hidden_, -xi_minus.at(0).at(1));
-    //temp_.addRow(*wo2_, negTarget, xi_minus.at(0).at(1));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar_->at(wordidx, ii)) + exp(outvar2_->at(negTarget, ii)));
       temp_[ii] += xi_minus.at(0).at(1)*invsumd*(hidden_.data_[ii] - wo2_->at(negTarget, ii));
     }
     // from i=1
-    //temp_.addVector(hidden2_, -xi_minus.at(1).at(1));
-    //temp_.addRow(*wo2_, negTarget, xi_minus.at(1).at(1));
     for (int64_t ii = 0; ii < temp_.m_; ii++) {
       real invsumd = 1./(1e-8 + exp(invar2_->at(wordidx, ii)) + exp(outvar2_->at(negTarget, ii)));
       temp_[ii] += xi_minus.at(1).at(1)*invsumd*(hidden2_.data_[ii] - wo2_->at(negTarget, ii));
     }
     wo2_->addRow(temp_, negTarget, -inv_sum_eminus);
   }
-  //std::cout << "loss = " << loss << std::endl;
   return std::max((real) 0.0, loss);
 }
 
@@ -1073,9 +934,6 @@ void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden) con
 
 
 void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden, bool dropout_dict, bool dropout_sub) const {
-//void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden) const {
-  // BenA: This method computes the average of the ngram vectors
-  // BenA: modification: remove dict embedding in the average (to be moved out later)
   assert(hidden.size() == hsz_);
   hidden.zero();
   int jjj = 0;
@@ -1087,11 +945,9 @@ void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden, boo
         // if include_dictemb is false, then also do the adding
         // if jjj != 0, do the adding (later)
       } else {
-        // BenA: this is for dropout_sub
         if (!dropout_sub){
           hidden.addRow(*wi_, *it);
         }
-        //hidden.addRow(*wi_, *it);
       }
     }
     jjj++;
@@ -1113,9 +969,6 @@ void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden, boo
 }
 
 void Model::computeHidden2(const std::vector<int32_t>& input, Vector& hidden, bool dropout_dict, bool dropout_sub) const {
-//void Model::computeHidden(const std::vector<int32_t>& input, Vector& hidden) const {
-  // BenA: This method computes the average of the ngram vectors
-  // BenA: modification: remove dict embedding in the average (to be moved out later)
   assert(hidden.size() == hsz_);
   hidden.zero();
   int jjj = 0;
@@ -1127,11 +980,9 @@ void Model::computeHidden2(const std::vector<int32_t>& input, Vector& hidden, bo
         // if include_dictemb is false, then also do the adding
         // if jjj != 0, do the adding (later)
       } else {
-        // BenA: this is for dropout_sub
         if (!dropout_sub){
           hidden.addRow(*wi2_, *it);
         }
-        //hidden.addRow(*wi_, *it);
       }
     }
     jjj++;
@@ -1231,14 +1082,6 @@ void Model::dfs(int32_t k, int32_t node, real score,
   dfs(k, tree[node].right, score + log(f), heap, hidden);
 }
 
-/*
-int probRand() {
-    static std::default_random_engine generator;
-    static std::uniform_real_distribution<float> distribution(0.0, 10.0);
-    distribution.changeParameters(0.0, 1.0);
-    return distribution(generator);
-}
-*/
 float probRand() {
     static thread_local std::mt19937 generator;
     std::uniform_int_distribution<int> distribution(0,1000);
@@ -1249,11 +1092,6 @@ void Model::update(const std::vector<int32_t>& input, int32_t target, real lr) {
   assert(target >= 0);
   assert(target < osz_);
   if (input.size() == 0) return;
-  // BenA - dropout
-  //float r = probRand();
-  //bool dropout_dict = args_->drop_dict && (r < 0.5);
-  //float r2 = probRand();
-  //bool dropout_sub = args_->drop_sub && (r2 < 0.5);
 
   // get the word index --> this is the first element in 'input'
   int32_t wordidx = 0;
@@ -1263,13 +1101,9 @@ void Model::update(const std::vector<int32_t>& input, int32_t target, real lr) {
   }
   
   computeHidden(input, hidden_, false, false);
-  // BenA
-  // TODO-MV - use only vector representation for cluster 2
-  //computeHidden2(input, hidden2_, false, false);
   computeHidden2_mv(input, hidden2_);
   if (args_->loss == loss_name::ns) {
     if (args_->multi){
-      // TODO-MV - switching to MultiVec version (vector for cluster 2)
       if (args_->var) {
         loss_ += negativeSamplingMultiVecVar(wordidx, target, lr);
       } else{
@@ -1279,11 +1113,9 @@ void Model::update(const std::vector<int32_t>& input, int32_t target, real lr) {
         loss_ += negativeSamplingMultiVec2(target, lr);
       }
       }
-      // no longer used the non mv version for multi
-      //loss_ += negativeSamplingMulti(target, lr);
     } else {
       if (args_->var) {
-        // TODO - define the method for single with variance
+        // not using this version
       } else {
       if (args_->expdot) {
         loss_ += negativeSamplingSingleExpdot(target, lr);
@@ -1325,25 +1157,18 @@ void Model::update(const std::vector<int32_t>& input, int32_t target, real lr) {
 void Model::groupSparsityRegularization(int min, int max, int num_gs_samples, double strength){
   // sampling from the uniform interval [min, max)
   grad_.zero();
-  //std::cerr << "osz_ =" << osz_ << std::endl;
-  //std::uniform_int_distribution<> uniform(0, osz_);
   std::uniform_int_distribution<> uniform(min, max-1);
   if (args_->gs_lambda > 1e-12){
-    //int num_gs_samples = args_->num_gs_samples;
     for (int ii = 0; ii < num_gs_samples; ii++){
       // Note: osz_ is the number of words in the dictionary
       // Perhaps adjusts the distribution of this sampler
-      //int32_t idx = std::rand() % osz_;
       int32_t idx = uniform(rng);
-      //std::cerr << "uniform(rng) yields" << idx << std::endl;
-      //loss_ += groupSparsityRegularization(args_->gs_lambda, idx);
       loss_ += groupSparsityRegularization(strength, idx);
     }
   }
 }
 
 real Model::groupSparsityRegularization(double reg_strength, int32_t word){
-  // 1. add to the loss
   // To be efficient, only do it if the strength is non-zero
   if (reg_strength > 0.0000000001) {
     real norm = wi_->l2NormRow(word);
@@ -1351,7 +1176,6 @@ real Model::groupSparsityRegularization(double reg_strength, int32_t word){
     // 2. update the wi_ accordingly based on the gradient
     // note: reuse the grad variable here
     grad_.zero();
-    //std::cerr << "word index = " << word << std::endl;
     grad_.addRow(*wi_, word, -reg_strength/(norm + 0.00001));
     wi_->addRow(grad_, word, 1.0);
     return loss;

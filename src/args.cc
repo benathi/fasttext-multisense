@@ -23,8 +23,6 @@ Args::Args() {
   epoch = 5;
   minCount = 5;
   minCountLabel = 0;
-  //neg = 5; BenA : For maximum margin, let's set default neg=1.
-  // Can revert to neg = 5 and see how it performs later
   neg = 1;
   wordNgrams = 1;
   loss = loss_name::ns;
@@ -61,7 +59,7 @@ Args::Args() {
   var_scale = 0.05; // This is the default for 50 dim - find a good value for 300 dim
   multi = false;
   expdot = false;
-  var = false; // by default, we do not do variance per word
+  var = false;
 }
 
 void Args::parseArgs(int argc, char** argv) {

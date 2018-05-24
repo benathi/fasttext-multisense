@@ -20,10 +20,6 @@
 #include <queue>
 #include <algorithm>
 
-// BenA: code to save array as npy
-//#include "cnpy.h"
-//#include <complex>
-
 
 namespace fasttext {
 
@@ -41,35 +37,21 @@ void FastText::getVector(Vector& vec, const std::string& word) {
 }
 
 void FastText::getVector(Vector& vec, const std::string& word, int which, float _beta) {
-  // for model inspection, we can choose which embeddigns we want to investigate
   vec.zero();
-  // for debugging for now
   if (which == CHARONLY || which == COMBINE) {
     const std::vector<int32_t>& ngrams = dict_->getNgrams(word);
-    //std::cerr << "word =" << word << std::endl;
     for (auto it = ngrams.begin(); it != ngrams.end(); ++it) {
-      //std::cerr << "nwords =" << dict_->nwords() << std::endl;
-      //std::cerr << "next hash value = " << (*it) - dict_->nwords() << std::endl;
       vec.addRow(*input_, *it);
     }
     if (ngrams.size() > 0) {
       vec.mul(1.0 / ngrams.size());
     }
     if (which == COMBINE){
-      // add the dictionary embeddings, if exists
       int32_t id = dict_->getId(word);
-      //std::cout << "Gated = " << args_->gated << std::cout;
-      //if (args_->gated){
-      if (true){// BenA : DEBUG - hard code gated
+      if (true){
         if (id >= 0){ 
           real ratio = (1.*id)/(1.*dict_->nwords());
-          //std::cerr << "id = " << id << "ratio =" << ratio << std::endl;
-          //std::cerr << "gated =" << args_->gated << std::endl;
-          //std::cerr << "beta =" << args_->beta << std::endl;
-          //real beta = args_->beta;
-          //real beta = 16.0;
           real beta = _beta;
-          //real beta = 5.0;
           std::cerr << "beta = " << beta << std::endl;
           real dict_weight = std::exp(-beta*ratio*ratio);
           vec.mul(1. - dict_weight);
@@ -77,16 +59,13 @@ void FastText::getVector(Vector& vec, const std::string& word, int which, float 
         }
       } else {
         if (id >= 0){
-          // Do we use input or output here?
           vec.addRow(*output_, id);
         }
       }
     }
   } else if (which == WORDONLY) {
-      // return the dictionary embeddings, if exists, otherwise return a zero vector
     int32_t id = dict_->getId(word);
     if (id >= 0){
-      // Do we use input or output here?
       vec.addRow(*output_, id);
     }
   }
@@ -179,20 +158,6 @@ void FastText::saveModel() {
   ofs.close();
 }
 
-//BenA
-/*
-void FastText::saveNgramVectors(std::string prefix) {
-  std::string fname_in(prefix + ".out_.npy");
-  std::cerr << "Writing output_ to file " << fname_in << std::endl;
-  const unsigned int Nx = output_->m_;
-  const unsigned int Ny = output_->n_;
-  const unsigned int shape_in[] = {Nx, Ny};
-  std::complex<double>* output_double = new std::complex<double>[Nx*Ny];
-  for(int i = 0;i < Nx*Ny; i++) output_double[i] = std::complex<double>(output_->data_[i],0.0);
-  cnpy::npy_save(fname_in, output_double, shape_in, 2, "w"); // "w" overwrites any existing file
-}
-*/
-
 
 void FastText::saveNgramVectors(std::string prefix) {
   std::string fndict(prefix + ".words");
@@ -209,7 +174,6 @@ void FastText::saveNgramVectors(std::string prefix) {
   ///////////////////////////////////////
   std::string f_in(prefix + ".in");
   std::cerr << "Saving input_ to file: " << f_in << std::endl;
-  //std::ofstream ofs(args_->output + ".ngrams");
   std::ofstream ofs_in(f_in);
   if (!ofs_in.is_open()) {
     std::cerr << "Error opening file for saving vectors." << std::endl;
@@ -242,15 +206,11 @@ void FastText::saveNgramVectors(std::string prefix) {
     std::cout << "Multi-Prototype Case: saving additional matrices" << std::endl; 
   std::string f_in2(prefix + ".in2");
   std::cerr << "Saving input2_ to file: " << f_in2 << std::endl;
-  //std::ofstream ofs(args_->output + ".ngrams");
   std::ofstream ofs_in2(f_in2);
   if (!ofs_in2.is_open()) {
     std::cerr << "Error opening file for saving vectors." << std::endl;
     exit(EXIT_FAILURE);
   }
-  //Vector vec(args_->dim);
-  // TODO-MV -- save only up to nwords
-  //for (int32_t i = 0; i < dict_->nwords() + args_->bucket; i++) {
   for (int32_t i = 0; i < dict_->nwords(); i++) {
     vec.zero();
     vec.addRow(*input2_, i);
@@ -286,8 +246,6 @@ void FastText::saveNgramVectors(std::string prefix) {
     }
     ofs_vec.close();
   }
-  // otherwise, if dictemb is not included, then the sum wouldn't make much sense
-  // because it's not trained that way
 }
 
 
@@ -334,8 +292,6 @@ void FastText::loadModel(std::istream& in) {
     output_->load(in);
   }
 
-  // BenA: need to modify this when we load?
-  //model_ = std::make_shared<Model>(input_, output_, input2_, output2_, args_, 0);
   model_ = std::make_shared<Model>(input_, output_, input2_, output2_, inputvar_, input2var_, outputvar_, output2var_, args_, 0);
   model_->quant_ = quant_;
   model_->setQuantizePointer(qinput_, qoutput_, args_->qout);
@@ -454,8 +410,6 @@ void FastText::cbow(Model& model, real lr,
 void FastText::skipgram(Model& model, real lr,
                         const std::vector<int32_t>& line) {
   std::uniform_int_distribution<> uniform(1, args_->ws);
-  //std::cerr << "Line size = " << line.size() << std::endl;
-  //std::cerr << line[0] << " " << line[1] << " " << line[2] << std::endl;
   for (int32_t w = 0; w < line.size(); w++) {
     int32_t boundary = uniform(model.rng);
     const std::vector<int32_t>& ngrams = dict_->getNgrams(line[w]);
@@ -464,17 +418,6 @@ void FastText::skipgram(Model& model, real lr,
         model.update(ngrams, line[w + c], lr);
       }
     }
-    // For each center word
-    // We update it with many context words
-    // (for each context word, there's negative sampling involving many negative context words)
-    // then, we do group sparsity regularization once.
-    // Note: the word gets updated around 2*boundary + 1 where the group sparsity push it down once
-    // TODO - we could modify to put it right after model.update
-    
-    // Group sparsity for the dictionary embeddings
-    //model.groupSparsityRegularization(0, dict_->nwords(), args_->num_gs_samples, args_->gs_lambda);
-    // Group Sparsity Regularization within subword
-    //model.groupSparsityRegularization(dict_->nwords(), dict_->nwords() + args_->bucket, args_->num_subgs_samples, args_->gs_subword);
   }
 }
 
@@ -709,11 +652,7 @@ void FastText::trainThread(int32_t threadId) {
   std::ifstream ifs(args_->input);
   utils::seek(ifs, threadId * utils::size(ifs) / args_->thread);
 
-  //if (args_->var){
   Model model(input_, output_, input2_, output2_, inputvar_, input2var_, outputvar_, output2var_, args_, threadId);
-  //} else {
-  //  Model model(input_, output_, input2_, output2_, args_, threadId);
-  //}
   
   if (args_->model == model_name::sup) {
     model.setTargetCounts(dict_->getCounts(entry_type::label));
@@ -832,15 +771,10 @@ void FastText::train(std::shared_ptr<Args> args) {
   output_->zero();
 
   // BenA: This is for multi-prototype
-  // Use input2_ and output2_
   if (args_->pretrainedVectors.size() != 0) {
-    //loadVectors(args_->pretrainedVectors);
     std::cerr << "Pre Trained Option Not Available" << std::endl;
   } else {
-    // TODO-MV
-    // using only dictionary level for 2nd cluster
     input2_ = std::make_shared<Matrix>(dict_->nwords(), args_->dim);
-    //input2_ = std::make_shared<Matrix>(dict_->nwords()+args_->bucket, args_->dim);
     input2_->uniform(1.0 / args_->dim);
     if (args_->multi && args_->var){
       input2var_ = std::make_shared<Matrix>(dict_->nwords(), args_->dim);
@@ -867,7 +801,6 @@ void FastText::train(std::shared_ptr<Args> args) {
   } else {
     trainThread(0);
   }
-  //model_ = std::make_shared<Model>(input_, output_, input2_, output2_, args_, 0);
   model_ = std::make_shared<Model>(input_, output_, input2_, output2_, inputvar_, input2var_, outputvar_, output2var_, args_, 0);
   saveModel();
   if (args_->model != model_name::sup) {

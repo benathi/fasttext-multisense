@@ -174,52 +174,29 @@ void predict(int argc, char** argv) {
   exit(0);
 }
 
-// BenA: this is the original method
-/*
-void printWordVectors(int argc, char** argv) {
-  if (argc != 3) {
-    printPrintWordVectorsUsage();
-    exit(EXIT_FAILURE);
-  }
-  FastText fasttext;
-  fasttext.loadModel(std::string(argv[2]));
-  fasttext.printWordVectors();
-  exit(0);
-}
-*/
-
 void printWordVectors(int argc, char** argv) {
   if (argc != 3 & argc != 7) {
-  //if (argc != 3) {
     printPrintWordVectorsUsage();
     exit(EXIT_FAILURE);
   }
   FastText fasttext;
   fasttext.loadModel(std::string(argv[2]));
-  // What does loadModel do?
   if (argc == 7) {
-  //if (argc == 5){
     std::string argval (argv[4]);
     std::string wordstr ("word");
     std::string charstr ("char");
     float beta = atof(argv[6]);
-    //std::string combine1 ("combine");
     int which_emb = -1;
     if (argval.compare(wordstr) == 0){
-      //std::cerr << "Using Dictionary Embeddings" << std::endl;
       which_emb = WORDONLY;
     } else if (argval.compare(charstr) == 0) {
-      //std::cerr << "Using Char Embeddings" << std::endl;
       which_emb = CHARONLY;
     } else {
-      //std::cerr << "Using Aggregate Embeddings" << std::endl;
       which_emb = COMBINE;
     }
-    //int which_emb = atoi(argv[4]);
     std::cerr << "@ main Using beta = " << beta << std::endl;
     fasttext.printWordVectors(which_emb, beta);
   } else {
-    //std::cerr << "Using Aggregate Embeddings" << std::endl;
     fasttext.printWordVectors();
   }
   exit(0);

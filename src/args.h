@@ -72,7 +72,7 @@ class Args {
     float var_scale;
     bool multi;
     bool expdot;
-    bool var; // whether to do variance per word
+    bool var;
 };
 
 }
