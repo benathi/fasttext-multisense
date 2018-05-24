@@ -18,27 +18,16 @@ The BibTeX entry for the paper is:
 
 We provide 
 
-(1) pre-trained models in **1.**.
+**(1)** scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **1**. 
 
-(2) scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **2**. 
-
-(3) Python scripts to evaluate the trained models on word similarity or nearest neighbor search in **3**. 
+**(2)** Python scripts to evaluate the trained models on word similarity in **2**. Our scripts allows the subword model to be loaded directly into a Python object which can be used to other tasks. 
    
-(4) intructions on how to load a pre-trained FastText model (single sense) into Python **4**.
+**(3)** pre-trained model and evaluation script in **3.** This section includes intructions on how to load a pre-trained FastText model (single sense) into our format which allows loading as Python object. 
 
-## 1. Pre-Trained Models
 
-### 1.1 English
+## 1. Train
 
-### 1.2 Italian
-
-### 1.3 German
-
-### 1.4 French
-
-## 2. Train
-
-1. Compile the C++ files. The step requires a compiler with C++11 support such as g++-4.7.2 or newer or clang-3.3 or newer. It also requires **make** which can be installed via ``sudo apt-get install build-essential`` on Ubuntu. 
+1.1 Compile the C++ files. The step requires a compiler with C++11 support such as g++-4.7.2 or newer or clang-3.3 or newer. It also requires **make** which can be installed via ``sudo apt-get install build-essential`` on Ubuntu. 
 
 Once you have **make** and a C++ compiler, you can compile our code by executing:
 ```
@@ -46,7 +35,7 @@ make
 ```
 This command will generate *multift*, an executable of our model. 
 
-2. Obtain text data for training. We included scripts to download **text8** and **text9** in **data/**.
+1.2 Obtain text data for training. We included scripts to download **text8** and **text9** in **data/**.
 ```
 bash data/get_text8.sh
 bash data/get_text9.sh
@@ -55,7 +44,7 @@ In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our Eng
 
 The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (French) can be requested using the above link as well. 
 
-3. Run sample training scripts for *text8* or *text9*.
+1.3 Run sample training scripts for *text8* or *text9*.
 
 ```
 bash exps/train_text8_multi.sh
@@ -71,17 +60,18 @@ modelname.in2           The embeddings for the second Gaussian component.
 modelname.subword       The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module based on the files *.in and *.in2.
 ```
 
-## 3. Evaluate
+## 2. Evaluate
 
-1. The provided python module **multift.py** can be used to load the multisense FT object. 
+2.1 The provided python module **multift.py** can be used to load the multisense FT object. 
 
 ```
 ft = multift.MultiFastText(basename="modelfiles/modelname", multi=True)
 ```
+Note that the first time it loads the model can be quite slow. However, it saves the **.npy** files for later use which allows the loading to be much faster. 
 
 We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. 
 
-2. The script **eval/eval_model_wordsim.py** calculates the Spearman's correlation for multiple word similarity datasets given a model. We provide examples below.
+2.2 The script **eval/eval_model_wordsim.py** calculates the Spearman's correlation for multiple word similarity datasets given a model. We provide examples below.
 
 ```
 python eval/eval_model_wordsim.py --modelname modelfiles/multi_text8_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text8.txt
@@ -89,6 +79,8 @@ python eval/eval_model_wordsim.py --modelname modelfiles/multi_text9_e10_d300_vs
 ```
 
 Sample output of the text8. *sub* and *sub2* correspond to the Spearman's correlation of the first and second Gaussian components. We can see that having two components with potentially disentangled meanings improve the Spearman's correlation for word similarity. 
+
+Below is the output for word similarity evaluation on *text8*.
 ```
    Dataset        sub       sub2  sub-maxsim  
 0       SL  26.746543  10.859781   27.699946  
@@ -118,28 +110,51 @@ Top highest similarity of rock cl 1
 ['(band)]],:0', '(band)]]:0', 'songwriters:0', 'songwriter,:0', 'songwriter:0', ...
 ```
 
-### Replicating Paper Results
 
+## 3. Loading and Analyzing Pre-Trained Models
 
+Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin) model.
+
+### 3.1 Replicating our paper's results
+We provide scripts to load and evaluate the model below.
 ```
-python eval/eval_model_wordsim.py --modelname modelfiles/
+wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin -P modelfiles/
+./multift output-model modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin
+python eval/eval_model_wordsim.py --modelname modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1 --multi 1 | tee log/eval_wordsim_multift300_eng.txt
+```
+Output:
+```
+   Dataset        sub       sub2  sub-maxsim
+0       SL  37.338851  17.488524   39.605635
+1       WS  65.360961  28.699307   76.114355
+2     WS-S  71.203755  29.717879   80.114966
+3     WS-R  62.165077  35.096523   75.345368
+4      MEN  73.473605  30.225000   79.653409
+5       MC  77.280821  35.603027   80.930131
+6       RG  78.106458  21.979871   79.811171
+7       YP  54.495191  13.808997   54.929330
+8   MT-287  66.591830  26.882829   69.437580
+9   MT-771  58.283664  36.931110   69.678762
+10      RW  47.873384  -3.224643   49.358893
 ```
 
-```
-TODO -- Add the results here
-```
+### 3.2 Analyze FastText Objects in Python
 
-## 4. Analyze FastText Object in Python
-We additionally provide a FastText python wrapper for the original FastText objects (for instance, models downloaded from ..) or our multisense-FastText objects. Our models are in the format that can be loaded by *multift.py* directly. One can also  convert FastText objects to our model format via:
+FastText (www.fasttext.cc) provide model files in two formats: *.bin* and *.vec*. Note that the model based on *.bin* can calculate the representation for any given word that might not be in the directionary. This has the advantage over using *.vec* files which contains pre-calculated vectors of words in the training dictionary. 
 
+We additionally provide a functionality to convert the *.bin* FastText objects to our format, which can then be loaded into a Python object using *multift.py*.
+
+One can convert a *.bin* file into our format via:
 ```
 ./multift output-model modelfiles/downloaded_model.bin 
 ```
-
-The models in our format will be saved in **modelfiles/downloaded_model.in**. This model can be loaded with our Python script using:
+The model in our format will be saved in **modelfiles/downloaded_model.in**, **modelfiles/downloaded_model.out**, etc. This model can be loaded with our Python script using:
 ```
 ft = multift.MultiFastText(basename=modelfiles/downloaded_model, multi=False)
 ```
+Note that the above two steps will generate extra *.npy* files which allow for much faster loading at subsequent times. 
+
+#### Evaluating FastText
 
 The following script downloads the Wiki English embeddings from www.fasttext.cc, converts it to the python-readable format, and evaluate it on word similarity datasets.
 
@@ -149,5 +164,23 @@ cd modelfiles
 unzip wiki.en.zip
 cd ..
 ./multift output-model modelfiles/wiki.en.bin
-python eval/eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0
+python eval/eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0 | tee log/eval_wordsim_ft_wiki-eng.txt
 ```
+Output:
+```
+   Dataset  modelfiles/wiki.en-sub
+0       SL               38.033168
+1       WS               73.880820
+2     WS-S               78.111959
+3     WS-R               68.201896
+4      MEN               76.367311
+5       MC               81.197154
+6       RG               79.983827
+7       YP               53.327914
+8   MT-287               67.934178
+9   MT-771               66.892286
+10      RW               48.092870
+```
+
+
+Note: The C++ code is adapted from the FastText library (https://github.com/facebookresearch/fastText).
