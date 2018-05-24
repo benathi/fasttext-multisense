@@ -149,5 +149,5 @@ cd modelfiles
 unzip wiki.en.zip
 cd ..
 ./multift output-model modelfiles/wiki.en.bin
-python eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0
+python eval/eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0
 ```
