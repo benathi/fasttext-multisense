@@ -202,6 +202,7 @@ void FastText::saveNgramVectors(std::string prefix) {
 
   ///////////////////////////////////////
   // For multi-prototype
+  std::cerr << "Saving 2nd component. args_->multi = " << args_->multi << std::endl;
   if (args_->multi){
     std::cout << "Multi-Prototype Case: saving additional matrices" << std::endl; 
   std::string f_in2(prefix + ".in2");
@@ -265,6 +266,11 @@ void FastText::loadModel(const std::string& filename) {
   ifs.close();
 }
 
+void FastText::loadModel(const std::string& filename, bool multi) {
+  loadModel(filename);
+  args_->multi = multi; // setting 'multi variable explicitly'
+}
+
 void FastText::loadModel(std::istream& in) {
   args_ = std::make_shared<Args>();
   dict_ = std::make_shared<Dictionary>(args_);
@@ -272,7 +278,7 @@ void FastText::loadModel(std::istream& in) {
   output_ = std::make_shared<Matrix>();
   qinput_ = std::make_shared<QMatrix>();
   qoutput_ = std::make_shared<QMatrix>();
-  args_->load(in);
+  args_->load(in); // does not load properly
 
   dict_->load(in);
 

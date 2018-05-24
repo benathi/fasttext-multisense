@@ -109,10 +109,11 @@ void printAnalogiesUsage() {
 
 void printOutputModelUsage() {
   std::cout 
-    << "usage: fasttext output-model <model> {prefix}\n"
+    << "usage: fasttext output-model -multi <multi> <model> {prefix} \n"
     << " <model>      model filename (.bin file)\n"
     << " {prefix}     the prefix for files to be saved. (optional)\n"
     << "              if omitted, the basename for the model will be used."
+    << " <multi>      1 or 0 - whether this is a multi-prototype model"
     << std::endl;
 }
 
@@ -263,20 +264,27 @@ void train(int argc, char** argv) {
   fasttext.train(a);
 }
 
-// Ben A: to dump model into .ngrams, .dict_in, .dict_out
+// Ben A: to dump model into .words, .in, .out
+// support multift too. (.in2, .out2)
 void outputModel(int argc, char** argv) {
-  if (argc != 4 && argc!= 3) {
+  if (argc != 6 && argc!= 5) {
     printOutputModelUsage();
     exit(EXIT_FAILURE);
   }
+  bool multi = false;
+  if (strcmp(argv[2], "-multi") == 0) {
+    multi = atoi(argv[3]); // 0 for false and else for true
+    std::cerr << "@output-model. Multi = " << multi << std::endl;
+  }
+  // load
   FastText fasttext;
-  fasttext.loadModel(std::string(argv[2])); // This is the bin file
-  if (argc == 3) {
-    std::string model_str = argv[2];
+  fasttext.loadModel(std::string(argv[4]), multi); // This is the bin file
+  if (argc == 5) {
+    std::string model_str = argv[4];
     std::string basename = model_str.substr(0, model_str.length()-4);
     fasttext.saveNgramVectors(basename);
   } else {
-    fasttext.saveNgramVectors(argv[3]);
+    fasttext.saveNgramVectors(argv[5]);
   } 
   exit(0);
 }
