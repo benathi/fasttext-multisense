@@ -1,17 +1,1 @@
-Basename to evaluate = /efs/users/benathi/research/multift/modelfiles/dec19/multi/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1
-Cache subword
-Cache subword2
-No Caching of Multi Rep - subword_emb_multi[:,1] uses dictionary level directly
-Result DataFrame
-   Dataset        sub       sub2  sub-maxsim
-0       SL  37.338851  17.488524   39.605635
-1       WS  65.360961  28.699307   76.114355
-2     WS-S  71.203755  29.717879   80.114966
-3     WS-R  62.165077  35.096523   75.345368
-4      MEN  73.473605  30.225000   79.653409
-5       MC  77.280821  35.603027   80.930131
-6       RG  78.106458  21.979871   79.811171
-7       YP  54.495191  13.808997   54.929330
-8   MT-287  66.591830  26.882829   69.437580
-9   MT-771  58.283664  36.931110   69.678762
-10      RW  47.873384  -3.224643   49.358893
+Basename to evaluate = modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1
