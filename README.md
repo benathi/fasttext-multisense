@@ -128,4 +128,13 @@ The models in our format will be saved in **modelfiles/downloaded_model.in**. Th
 ft = multift.MultiFastText(basename=modelfiles/downloaded_model, multi=False)
 ```
 
-Ben: test to make sure
+The following script downloads the Wiki English embeddings from www.fasttext.cc, converts it to the python-readable format, and evaluate it on word similarity datasets.
+
+```
+https://s3-us-west-1.amazonaws.com/fasttext-vectors/wiki.en.zip -P modelfiles/
+cd modelfiles
+unzip wiki.en.zip
+cd ..
+./multift output-model modelfiles/wiki.en.bin
+python eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0
+```
