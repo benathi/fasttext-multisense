@@ -111,11 +111,11 @@ Top highest similarity of rock cl 1
 ```
 
 
-## Pre-Trained Models
+## 3. Loading and Analyzing Pre-Trained Models
 
 Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin) model.
 
-### Replicating our paper's results
+### 3.1 Replicating our paper's results
 We provide scripts to load and evaluate the model below.
 ```
 wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin -P modelfiles/
@@ -138,9 +138,11 @@ Output:
 10      RW  47.873384  -3.224643   49.358893
 ```
 
-### Analyze FastText Object in Python
+### 3.2 Analyze FastText Objects in Python
 
-We additionally provide a functionality to convert the original FastText objects (the *.bin* models downloaded from www.fasttext.cc) to our format, which can then be loaded into a Python object using *multift.py*. Note that the model based on *.bin* can calculate the representation for any given word that might not be in the directionary. This has the advantage over using *.vec* files which contains pre-calculated vectors of words in the training dictionary. 
+FastText (www.fasttext.cc) provide model files in two formats: *.bin* and *.vec*. Note that the model based on *.bin* can calculate the representation for any given word that might not be in the directionary. This has the advantage over using *.vec* files which contains pre-calculated vectors of words in the training dictionary. 
+
+We additionally provide a functionality to convert the *.bin* FastText objects to our format, which can then be loaded into a Python object using *multift.py*.
 
 One can convert a *.bin* file into our format via:
 ```
@@ -150,6 +152,9 @@ The model in our format will be saved in **modelfiles/downloaded_model.in**, **m
 ```
 ft = multift.MultiFastText(basename=modelfiles/downloaded_model, multi=False)
 ```
+Note that the above two steps will generate extra *.npy* files which allow for much faster loading at subsequent times. 
+
+#### Evaluating FastText
 
 The following script downloads the Wiki English embeddings from www.fasttext.cc, converts it to the python-readable format, and evaluate it on word similarity datasets.
 
@@ -176,7 +181,6 @@ Output:
 9   MT-771               66.892286
 10      RW               48.092870
 ```
-
 
 
 Note: The C++ code is adapted from the FastText library (https://github.com/facebookresearch/fastText).
