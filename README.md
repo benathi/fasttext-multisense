@@ -78,6 +78,7 @@ modelname.subword       The final representation of words in the dictionary. Not
 ```
 ft = multift.MultiFastText(basename="modelfiles/modelname", multi=True)
 ```
+Note that the first time it loads the model can be quite slow. However, it saves the **.npy** files for later use which allows the loading to be much faster. 
 
 We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. 
 
