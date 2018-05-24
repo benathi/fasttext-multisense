@@ -14,19 +14,29 @@ The BibTeX entry for the paper is:
 }
 ```
 
-## What's in this Library?
+## 0. What's in this Library?
 
 We provide 
 
-(1) scripts to train the multi-sense FastText embedding in *src*. We provide instructions on how to train the model below. 
+(1) Pre-trained models.
 
-(2) scripts to load the pre-trained models and evaluate.
+(2) scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **2**. 
 
-(3) We provide scripts to convert pre-trained FastText model (single sense) into Python as well. 
---- Ben: provide usage ---
+(3) Python scripts to evaluate the trained models on word similarity or nearest neighbor search in **3**. 
+   
+(4) We provide scripts to convert pre-trained FastText model (single sense) into Python as well in **4**.
 
+## 1. Pre-Trained Models
 
-## Training
+### 1.1 English
+
+### 1.2 Italian
+
+### 1.3 German
+
+### 1.4 French
+
+## 2. Train
 
 1. Compile the C++ files. The step requires a compiler with C++11 support such as g++-4.7.2 or newer or clang-3.3 or newer. It also requires **make** which can be installed via ``sudo apt-get install build-essential`` on Ubuntu. 
 
@@ -34,9 +44,9 @@ Once you have **make** and a C++ compiler, you can compile our code by executing
 ```
 make
 ```
-This command will generate *multift*, an executable of our model for training and loading existing models. 
+This command will generate *multift*, an executable of our model. 
 
-2. Obtain text data. We included scripts to download **text8** and **text9** in **data/**.
+2. Obtain text data for training. We included scripts to download **text8** and **text9** in **data/**.
 ```
 bash data/get_text8.sh
 bash data/get_text9.sh
@@ -54,22 +64,20 @@ bash exps/train_text8_multi.sh
 After the training is complete, the following files will be saved:
 
 ```
-modelname.words     List of words in the dictionary
-modelname.bin       A binary file for the subword embedding model
-modelname.in        The subword embeddings
-modelname.in2       The embeddings for the second Gaussian component.
-modelname.subword   The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module.
+modelname.words         List of words in the dictionary
+modelname.bin           A binary file for the subword embedding model
+modelname.in            The subword embeddings
+modelname.in2           The embeddings for the second Gaussian component.
+modelname.subword       The final representation of words in the dictionary. Note that the representation for words outside the dictionary can be computed using the provided python module based on the files *.in and *.in2.
 ```
 
-## Evaluate  Models
+## 3. Evaluate
 
 1. The provided python module **multift.py** can be used to load the multisense FT object. 
 
 ```
-ft = multift.MultiFastText(basename="", multi=True)
+ft = multift.MultiFastText(basename="modelfiles/modelname", multi=True)
 ```
-
-**BenA : add instruction to evaluate single-sense models**
 
 We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. 
 
@@ -96,7 +104,6 @@ Sample output of the text8. *sub* and *sub2* correspond to the Spearman's correl
 10      RW  36.954597   3.707983   33.639994  
 ```
 
-
 A sample script **eval/eval_text9_model_nn.py** show the nearest neighbors of words such as *rock*, *star*, and *cell* where we observe multiple meanings for each word.
 ```
 python eval/eval_text9_model_nn.py | tee log/eval_text9_model_nn.txt
@@ -111,12 +118,18 @@ Top highest similarity of rock cl 1
 ['(band)]],:0', '(band)]]:0', 'songwriters:0', 'songwriter,:0', 'songwriter:0', ...
 ```
 
-## Download Pretrained Models
-
-### English Model
+### Replicating Paper Results
 
 
-## Analyze FastText Object in Python
+```
+python eval/eval_model_wordsim.py --modelname modelfiles/
+```
+
+```
+TODO -- Add the results here
+```
+
+## 4. Analyze FastText Object in Python
 We additionally provide a FastText python wrapper for the original FastText objects (for instance, models downloaded from ..) or our multisense-FastText objects. Our models are in the format that can be loaded by *multift.py* directly. One can also  convert FastText objects to our model format via:
 
 ```
