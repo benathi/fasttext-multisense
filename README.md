@@ -18,16 +18,16 @@ The BibTeX entry for the paper is:
 
 We provide 
 
-(1) scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **1**. 
+**(1)** scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **1**. 
 
-(2) Python scripts to evaluate the trained models on word similarity or nearest neighbor search in **2**. 
+**(2)** Python scripts to evaluate the trained models on word similarity in **2**. Our scripts allows the subword model to be loaded directly into a Python object which can be used to other tasks. 
    
-(3) pre-trained models in **3.**. This section includes intructions on how to load a pre-trained FastText model (single sense) into Python **3**.
+**(3)** pre-trained model and evaluation script in **3.** This section includes intructions on how to load a pre-trained FastText model (single sense) into our format which allows loading as Python object. 
 
 
 ## 1. Train
 
-1. Compile the C++ files. The step requires a compiler with C++11 support such as g++-4.7.2 or newer or clang-3.3 or newer. It also requires **make** which can be installed via ``sudo apt-get install build-essential`` on Ubuntu. 
+1.1 Compile the C++ files. The step requires a compiler with C++11 support such as g++-4.7.2 or newer or clang-3.3 or newer. It also requires **make** which can be installed via ``sudo apt-get install build-essential`` on Ubuntu. 
 
 Once you have **make** and a C++ compiler, you can compile our code by executing:
 ```
@@ -35,7 +35,7 @@ make
 ```
 This command will generate *multift*, an executable of our model. 
 
-2. Obtain text data for training. We included scripts to download **text8** and **text9** in **data/**.
+1.2 Obtain text data for training. We included scripts to download **text8** and **text9** in **data/**.
 ```
 bash data/get_text8.sh
 bash data/get_text9.sh
@@ -44,7 +44,7 @@ In our paper, we use the concatenation of *ukWaC* and *WaCkypedia_EN* as our Eng
 
 The foreign language datasets *deWac* (German), *itWac* (Italian), and *frWac* (French) can be requested using the above link as well. 
 
-3. Run sample training scripts for *text8* or *text9*.
+1.3 Run sample training scripts for *text8* or *text9*.
 
 ```
 bash exps/train_text8_multi.sh
@@ -62,7 +62,7 @@ modelname.subword       The final representation of words in the dictionary. Not
 
 ## 2. Evaluate
 
-1. The provided python module **multift.py** can be used to load the multisense FT object. 
+2.1 The provided python module **multift.py** can be used to load the multisense FT object. 
 
 ```
 ft = multift.MultiFastText(basename="modelfiles/modelname", multi=True)
@@ -71,7 +71,7 @@ Note that the first time it loads the model can be quite slow. However, it saves
 
 We can query for nearest neighbors give a word or evaluate the embeddings against word similarity datasets. 
 
-2. The script **eval/eval_model_wordsim.py** calculates the Spearman's correlation for multiple word similarity datasets given a model. We provide examples below.
+2.2 The script **eval/eval_model_wordsim.py** calculates the Spearman's correlation for multiple word similarity datasets given a model. We provide examples below.
 
 ```
 python eval/eval_model_wordsim.py --modelname modelfiles/multi_text8_e10_d300_vs2e-4_lr1e-5_margin1 | tee log/eval_wordsim_text8.txt
@@ -79,6 +79,8 @@ python eval/eval_model_wordsim.py --modelname modelfiles/multi_text9_e10_d300_vs
 ```
 
 Sample output of the text8. *sub* and *sub2* correspond to the Spearman's correlation of the first and second Gaussian components. We can see that having two components with potentially disentangled meanings improve the Spearman's correlation for word similarity. 
+
+Below is the output for word similarity evaluation on *text8*.
 ```
    Dataset        sub       sub2  sub-maxsim  
 0       SL  26.746543  10.859781   27.699946  
@@ -111,7 +113,7 @@ Top highest similarity of rock cl 1
 
 ## Pre-Trained Models
 
-We provide the pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin) model.
+Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin) model.
 
 ### Replicating our paper's results
 We provide scripts to load and evaluate the model below.
@@ -137,13 +139,14 @@ Output:
 ```
 
 ### Analyze FastText Object in Python
-We additionally provide a FastText python wrapper for the original FastText objects (for instance, models downloaded from ..) or our multisense-FastText objects. Our models are in the format that can be loaded by *multift.py* directly. One can also  convert FastText objects to our model format via:
 
+We additionally provide a functionality to convert the original FastText objects (the *.bin* models downloaded from www.fasttext.cc) to our format, which can then be loaded into a Python object using *multift.py*. Note that the model based on *.bin* can calculate the representation for any given word that might not be in the directionary. This has the advantage over using *.vec* files which contains pre-calculated vectors of words in the training dictionary. 
+
+One can convert a *.bin* file into our format via:
 ```
 ./multift output-model modelfiles/downloaded_model.bin 
 ```
-
-The models in our format will be saved in **modelfiles/downloaded_model.in**. This model can be loaded with our Python script using:
+The model in our format will be saved in **modelfiles/downloaded_model.in**, **modelfiles/downloaded_model.out**, etc. This model can be loaded with our Python script using:
 ```
 ft = multift.MultiFastText(basename=modelfiles/downloaded_model, multi=False)
 ```
