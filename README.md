@@ -119,7 +119,7 @@ Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/pro
 We provide scripts to load and evaluate the model below.
 ```
 wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin -P modelfiles/
-./multift output-model modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin
+./multift output-model -multi 1 modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin
 python eval/eval_model_wordsim.py --modelname modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1 --multi 1 | tee log/eval_wordsim_multift300_eng.txt
 ```
 Output:
@@ -146,7 +146,7 @@ We additionally provide a functionality to convert the *.bin* FastText objects t
 
 One can convert a *.bin* file into our format via:
 ```
-./multift output-model modelfiles/downloaded_model.bin 
+./multift output-model -multi 0 modelfiles/downloaded_model.bin 
 ```
 The model in our format will be saved in **modelfiles/downloaded_model.in**, **modelfiles/downloaded_model.out**, etc. This model can be loaded with our Python script using:
 ```
@@ -163,7 +163,7 @@ https://s3-us-west-1.amazonaws.com/fasttext-vectors/wiki.en.zip -P modelfiles/
 cd modelfiles
 unzip wiki.en.zip
 cd ..
-./multift output-model modelfiles/wiki.en.bin
+./multift output-model -multi 0 modelfiles/wiki.en.bin
 python eval/eval_model_wordsim.py --modelname modelfiles/wiki.en --multi 0 | tee log/eval_wordsim_ft_wiki-eng.txt
 ```
 Output:
