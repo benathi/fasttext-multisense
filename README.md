@@ -18,13 +18,13 @@ The BibTeX entry for the paper is:
 
 We provide 
 
-(1) Pre-trained models.
+(1) pre-trained models in **1.**.
 
 (2) scripts to train the multi-sense FastText embeddings. We give instructions on how to train the model in **2**. 
 
 (3) Python scripts to evaluate the trained models on word similarity or nearest neighbor search in **3**. 
    
-(4) We provide scripts to convert pre-trained FastText model (single sense) into Python as well in **4**.
+(4) intructions on how to load a pre-trained FastText model (single sense) into Python **4**.
 
 ## 1. Pre-Trained Models
 
