@@ -113,13 +113,15 @@ Top highest similarity of rock cl 1
 
 ## 3. Loading and Analyzing Pre-Trained Models
 
-Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin) model.
+Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z) model. The *.tar.7z* file contails *.npy* files of vectors and *.words* for the dictionary file. 
 
 ### 3.1 Replicating our paper's results
 We provide scripts to load and evaluate the model below.
 ```
-wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin -P modelfiles/
-./multift output-model -multi 1 modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.bin
+wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z -P modelfiles/
+cd modelfiles
+7z x -so mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z | tar xf - -C .
+cd ..
 python eval/eval_model_wordsim.py --modelname modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1 --multi 1 | tee log/eval_wordsim_multift300_eng.txt
 ```
 Output:
