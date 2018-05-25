@@ -117,14 +117,28 @@ Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/pro
 
 ### 3.1 Replicating our paper's results
 We provide scripts to load and evaluate the model below.
+
+7z option (15 GB download, long extraction time)
 ```
 wget https://s3.amazonaws.com/probabilistic-ft-multisense/multift-english/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z -P modelfiles/
 cd modelfiles
 7z x -so mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z | tar xf - -C .
 cd ..
+```
+or zip option (30 GB, faster extraction time)
+```
+wget https://s3.amazonaws.com/probabilistic-ft-multisense/multift-english/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.zip -P modelfiles/
+cd modelfiles
+unzip mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.zip
+cd ..
+```
+
+Then evaluate the downloaded model using:
+```
 python eval/eval_model_wordsim.py --modelname modelfiles/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1 --multi 1 | tee log/eval_wordsim_multift300_eng.txt
 ```
-Output:
+
+Below is the expected output:
 ```
    Dataset        sub       sub2  sub-maxsim
 0       SL  37.338851  17.488524   39.605635
