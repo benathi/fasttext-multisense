@@ -118,7 +118,7 @@ Download our pre-trained [English](https://bucket.s3.us-east-1.amazonaws.com/pro
 ### 3.1 Replicating our paper's results
 We provide scripts to load and evaluate the model below.
 ```
-wget https://bucket.s3.us-east-1.amazonaws.com/probabilistic-ft-multisense/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z -P modelfiles/
+wget https://s3.amazonaws.com/probabilistic-ft-multisense/multift-english/mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z -P modelfiles/
 cd modelfiles
 7z x -so mv-wacky_e10_d300_vs2e-4_lr1e-5_mar1.tar.7z | tar xf - -C .
 cd ..
