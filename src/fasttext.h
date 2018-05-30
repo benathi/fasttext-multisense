@@ -1,5 +1,6 @@
 /**
  * Copyright (c) 2016-present, Facebook, Inc.
+ *               2018-present, Ben Athiwaratkun
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
